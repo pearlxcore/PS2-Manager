@@ -2,6 +2,8 @@
 
 A desktop tool for managing a collection of PS2 disc images. Browse, search, rename, and organize your games with metadata pulled from the PS2 game database.
 
+<img width="2560" height="1392" alt="image" src="https://github.com/user-attachments/assets/1d5f496c-37ee-4c6e-889d-6aa1b1297c45" />
+
 ## What it does
 
 * Scans folders for PS2 disc images (.iso, .bin, .img) and reads game info directly from each disc

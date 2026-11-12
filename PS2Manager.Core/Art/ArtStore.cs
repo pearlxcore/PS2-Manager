@@ -53,6 +53,32 @@ public sealed class ArtStore(string rootDir)
     public string Import(string gameId, ArtType type, string sourceFile) =>
         Save(gameId, type, File.ReadAllBytes(sourceFile), Path.GetExtension(sourceFile));
 
+    /// <summary>
+    /// Imports front covers from the old version's Covers folder (&lt;GAMEID&gt;.jpg / .png).
+    /// Existing covers are kept. Returns the number imported.
+    /// </summary>
+    public int ImportLegacyCovers(string coversDir)
+    {
+        if (!Directory.Exists(coversDir)) return 0;
+        int n = 0;
+        foreach (var file in Directory.EnumerateFiles(coversDir))
+        {
+            string ext = Path.GetExtension(file).ToLowerInvariant();
+            if (ext is not (".jpg" or ".jpeg" or ".png")) continue;
+            string id = GameIds.Normalize(Path.GetFileNameWithoutExtension(file));
+            if (!GameIds.IsKnown(id) || Has(id, ArtType.Cover)) continue;
+            try
+            {
+                var bytes = File.ReadAllBytes(file);
+                if (!IsImage(bytes)) continue;
+                Save(id, ArtType.Cover, bytes, ext);
+                n++;
+            }
+            catch (Exception ex) { Log.Error($"Legacy cover {file}", ex); }
+        }
+        return n;
+    }
+
     public void Delete(string gameId, ArtType type)
     {
         string dir = GameDir(gameId);

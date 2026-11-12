@@ -209,8 +209,12 @@ public sealed partial class LibraryViewModel : ObservableObject
         try
         {
             var games = LibraryStore.ImportLegacyManifest(path);
+            // The old version kept covers in <exe>\Covers next to <exe>\Manifests.
+            string? exeDir = Path.GetDirectoryName(Path.GetDirectoryName(path));
+            int covers = exeDir is null ? 0 : _library.Art.ImportLegacyCovers(Path.Combine(exeDir, "Covers"));
             _library.ImportEntries(games);
-            _notify.Success("Manifest imported", $"{games.Count:N0} entries. Run a rescan to refresh disc details.");
+            _notify.Success("Manifest imported",
+                $"{games.Count:N0} entries" + (covers > 0 ? $", {covers:N0} covers reused" : "") + ". Run a rescan to refresh disc details.");
         }
         catch (Exception ex)
         {

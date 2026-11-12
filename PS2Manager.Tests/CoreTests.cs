@@ -214,7 +214,7 @@ public class LibraryAndToolsTests
         string manifest = tmp.File("ps2_manifest.json", $$"""
         { "SavedAt": "2025-01-01T00:00:00", "Games": [
           { "IsoPath": {{System.Text.Json.JsonSerializer.Serialize(iso)}}, "GameId": "SLUS-20062", "Title": "GT4", "TitleSource": 0, "Validity": 0, "DiscNumber": 1, "Pcsx2Crc": 305419896 },
-          { "IsoPath": "C:\\nope\\x.iso", "GameId": "Unknown", "Title": "Burnout 3", "TitleSource": 2, "Validity": 2 }
+          { "IsoPath": "C:\\nope\\x.iso", "GameId": "Unknown", "Title": "Burnout 3", "TitleSource": 2, "Validity": 2, "Crc32": null, "Pcsx2Crc": null, "Metadata": null }
         ]}
         """);
 

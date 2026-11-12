@@ -46,13 +46,13 @@ public static class LibraryStore
             var e = new GameEntry
             {
                 IsoPath = iso,
-                SizeBytes = g.TryGetProperty("SizeBytes", out var sz) && sz.TryGetInt64(out var l) ? l : 0,
+                SizeBytes = Num(g, "SizeBytes") is { } l ? (long)l : 0,
                 GameId = GameIds.Normalize(Str(g, "GameId")),
                 BootElf = Str(g, "BootElf"),
                 Version = Str(g, "Version"),
-                DiscNumber = g.TryGetProperty("DiscNumber", out var dn) && dn.TryGetInt32(out var d) ? d : 1,
-                Pcsx2Crc = g.TryGetProperty("Pcsx2Crc", out var pc) && pc.TryGetUInt32(out var p) ? p : null,
-                Crc32 = g.TryGetProperty("Crc32", out var cc) && cc.TryGetUInt32(out var c) ? c : null,
+                DiscNumber = Num(g, "DiscNumber") is { } d and > 0 and < 10 ? (int)d : 1,
+                Pcsx2Crc = Num(g, "Pcsx2Crc") is { } p and >= 0 and <= uint.MaxValue ? (uint)p : null,
+                Crc32 = Num(g, "Crc32") is { } c and >= 0 and <= uint.MaxValue ? (uint)c : null,
             };
 
             // Old titles that came from the volume label are kept as the label fallback.
@@ -78,6 +78,10 @@ public static class LibraryStore
         }
         return result;
     }
+
+    /// <summary>A numeric property as long; null when missing, null-valued or not a number.</summary>
+    private static long? Num(JsonElement e, string name) =>
+        e.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.Number && p.TryGetInt64(out long v) ? v : null;
 
     private static string Str(JsonElement e, string name) =>
         e.TryGetProperty(name, out var p) ? p.ValueKind switch

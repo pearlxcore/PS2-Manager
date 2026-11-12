@@ -1,3 +1,5 @@
+<p align="center"><img src="PS2Manager.App/Assets/logo.png" width="128" alt="PS2 Manager logo"></p>
+
 # PS2 Manager
 
 A dark-themed Windows app for managing a PS2 disc image collection and the Open PS2 Loader (OPL) device you play it from. Browse with covers, edit game info, download art, rename files from game data, and send games to a USB drive or network share with their CFG and ART files in place.

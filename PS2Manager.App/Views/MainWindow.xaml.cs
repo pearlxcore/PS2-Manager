@@ -64,6 +64,26 @@ public partial class MainWindow : FluentWindow
             page.Visibility = name == key ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    private void OnTogglePane(object sender, RoutedEventArgs e) =>
-        NavPane.Width = NavPane.Width > 100 ? 52 : 210;
+    private void OnTogglePane(object sender, RoutedEventArgs e)
+    {
+        var collapse = NavPane.Width > 100;
+        NavPane.Width = collapse ? 52 : 210;
+        // Hide labels (instead of clipping them mid-word) and show them as tooltips while collapsed.
+        foreach (var item in FindNavItems(NavPane))
+            if (item.Content is System.Windows.Controls.Panel panel)
+                foreach (var label in panel.Children.OfType<System.Windows.Controls.TextBlock>())
+                {
+                    label.Visibility = collapse ? Visibility.Collapsed : Visibility.Visible;
+                    item.ToolTip = collapse ? label.Text : null;
+                }
+    }
+
+    private static IEnumerable<System.Windows.Controls.RadioButton> FindNavItems(DependencyObject root)
+    {
+        foreach (var child in LogicalTreeHelper.GetChildren(root).OfType<DependencyObject>())
+        {
+            if (child is System.Windows.Controls.RadioButton rb) yield return rb;
+            else foreach (var nested in FindNavItems(child)) yield return nested;
+        }
+    }
 }

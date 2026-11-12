@@ -1,0 +1,164 @@
+<Page
+    x:Class="PS2Manager.App.Views.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:vm="clr-namespace:PS2Manager.App.ViewModels"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    Title="Settings"
+    d:DataContext="{d:DesignInstance vm:SettingsViewModel}"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="900" Margin="24,8,24,24">
+            <TextBlock Margin="0,0,0,16" Style="{StaticResource PageTitle}" Text="Settings" />
+
+            <!--  Library folders  -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="Library folders" />
+            <Border Margin="0,0,0,20" Style="{StaticResource Panel}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ListBox MinHeight="90" MaxHeight="200" ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedFolder}" />
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <ui:Button Margin="0,0,0,6" HorizontalAlignment="Stretch" Command="{Binding AddFolderCommand}" Content="Add…" />
+                        <ui:Button HorizontalAlignment="Stretch" Command="{Binding RemoveFolderCommand}" Content="Remove" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--  Startup & scanning  -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="Startup &amp; scanning" />
+            <Border Margin="0,0,0,20" Style="{StaticResource Panel}">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding AutoScanOnStartup}" />
+                        <StackPanel>
+                            <TextBlock Text="Quick rescan on startup" />
+                            <TextBlock Style="{StaticResource Muted}" Text="Picks up new, changed and removed files. Unchanged discs aren't reopened." />
+                        </StackPanel>
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding AutoDownloadCovers}" />
+                        <StackPanel>
+                            <TextBlock Text="Download missing covers on startup" />
+                            <TextBlock Style="{StaticResource Muted}" Text="Front covers only; other art from the Art manager or Tools." />
+                        </StackPanel>
+                    </DockPanel>
+                    <DockPanel>
+                        <ComboBox Width="90" DockPanel.Dock="Right" ItemsSource="{Binding ParallelismOptions}" SelectedItem="{Binding ScanParallelism}" />
+                        <StackPanel>
+                            <TextBlock Text="Discs read at once" />
+                            <TextBlock Style="{StaticResource Muted}" Text="Higher is faster on SSDs; use 1–2 for USB hard drives." />
+                        </StackPanel>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  Art sources  -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="Art sources" />
+            <Border Margin="0,0,0,20" Style="{StaticResource Panel}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ListBox ItemsSource="{Binding ArtSources}" SelectedItem="{Binding SelectedSource}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:ArtSourceOption}">
+                                <StackPanel Margin="0,2" Orientation="Horizontal">
+                                    <CheckBox VerticalAlignment="Center" IsChecked="{Binding IsEnabled}" />
+                                    <StackPanel Margin="6,0,0,0">
+                                        <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
+                                        <TextBlock Style="{StaticResource Muted}" Text="{Binding Description}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <ui:Button Margin="0,0,0,6" Command="{Binding MoveSourceCommand}" CommandParameter="up" ToolTip="Try earlier">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="ArrowUp24" />
+                            </ui:Button.Icon>
+                        </ui:Button>
+                        <ui:Button Command="{Binding MoveSourceCommand}" CommandParameter="down" ToolTip="Try later">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="ArrowDown24" />
+                            </ui:Button.Icon>
+                        </ui:Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--  Rename  -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="Rename defaults" />
+            <Border Margin="0,0,0,20" Style="{StaticResource Panel}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="160" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock VerticalAlignment="Center" Text="File name template" />
+                    <ComboBox Grid.Column="1" IsEditable="True" ItemsSource="{Binding RenamePresets}" Text="{Binding RenameTemplate, UpdateSourceTrigger=LostFocus}" />
+                    <TextBlock Grid.Row="1" Margin="0,8,0,0" VerticalAlignment="Center" Text="Folder template" />
+                    <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,8,0,0" IsEditable="True" ItemsSource="{Binding FolderPresets}" Text="{Binding FolderTemplate, UpdateSourceTrigger=LostFocus}" />
+                    <TextBlock Grid.Row="2" Margin="0,8,0,0" VerticalAlignment="Center" Text="When names clash" />
+                    <ComboBox Grid.Row="2" Grid.Column="1" Margin="0,8,0,0" ItemsSource="{Binding ConflictModes}" SelectedItem="{Binding ConflictMode}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource EnumText}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </Grid>
+            </Border>
+
+            <!--  Data  -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="Data" />
+            <Border Margin="0,0,0,20" Style="{StaticResource Panel}">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <ui:Button Command="{Binding UpdateDatabaseCommand}" Content="Update" DockPanel.Dock="Right" />
+                        <StackPanel>
+                            <TextBlock Text="Game database" />
+                            <TextBlock Style="{StaticResource Muted}" Text="{Binding DatabaseStatus}" />
+                        </StackPanel>
+                    </DockPanel>
+                    <DockPanel>
+                        <ui:Button Command="{Binding OpenDataFolderCommand}" Content="Open" DockPanel.Dock="Right" />
+                        <StackPanel>
+                            <TextBlock Text="Data folder" />
+                            <TextBlock Style="{StaticResource Muted}" Text="{Binding DataFolder}" />
+                        </StackPanel>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <!--  About  -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="About" />
+            <Border Style="{StaticResource Panel}">
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold">
+                        <Run Text="PS2 Manager " /><Run Text="{Binding Version, Mode=OneWay}" />
+                    </TextBlock>
+                    <TextBlock Margin="0,6,0,0" Style="{StaticResource Muted}" Text="Game data from GameDB-PS2 · Covers from xlenore/ps2-covers and the OPL Manager art database archive · Disc reading by DiscUtils · UI by WPF-UI." />
+                    <WrapPanel Margin="0,8,0,0">
+                        <ui:HyperlinkButton Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/niemasd/GameDB-PS2" Content="GameDB-PS2" />
+                        <ui:HyperlinkButton Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/xlenore/ps2-covers" Content="xlenore/ps2-covers" />
+                        <ui:HyperlinkButton Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/Luden02/psx-ps2-opl-art-database" Content="OPL art database" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

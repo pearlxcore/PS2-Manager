@@ -1,0 +1,210 @@
+<local:DialogWindow
+    x:Class="PS2Manager.App.Views.Dialogs.GameEditorWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:PS2Manager.App.Views.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:vm="clr-namespace:PS2Manager.App.ViewModels"
+    Title="Edit game info"
+    Width="860"
+    Height="760"
+    MinWidth="700"
+    MinHeight="560"
+    d:DataContext="{d:DesignInstance vm:GameEditorViewModel}"
+    mc:Ignorable="d">
+
+    <local:DialogWindow.Resources>
+        <!--  Label row: name, "edited" dot, reset link  -->
+        <DataTemplate x:Key="FieldHeader" DataType="{x:Type vm:EditableField}">
+            <DockPanel Margin="0,0,0,4">
+                <ui:HyperlinkButton
+                    Padding="2,0"
+                    Command="{Binding ResetCommand}"
+                    Content="Reset"
+                    DockPanel.Dock="Right"
+                    FontSize="11"
+                    ToolTip="{Binding BaseText}"
+                    Visibility="{Binding IsChanged, Converter={StaticResource BoolToVis}}" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontSize="12" Foreground="{StaticResource MutedTextBrush}" Text="{Binding Label}" />
+                    <Ellipse Width="6" Height="6" Margin="6,0,0,0" VerticalAlignment="Center" Fill="{StaticResource EditedBrush}" ToolTip="Changed from the database value" Visibility="{Binding IsChanged, Converter={StaticResource BoolToVis}}" />
+                </StackPanel>
+            </DockPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TextField" DataType="{x:Type vm:EditableField}">
+            <StackPanel Margin="0,0,0,12">
+                <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource FieldHeader}" />
+                <ui:TextBox PlaceholderText="{Binding BaseValue}" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="MultilineField" DataType="{x:Type vm:EditableField}">
+            <StackPanel Margin="0,0,0,12">
+                <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource FieldHeader}" />
+                <ui:TextBox
+                    Height="110"
+                    VerticalContentAlignment="Top"
+                    PlaceholderText="Short description shown on OPL's info page"
+                    Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                    TextWrapping="Wrap"
+                    VerticalScrollBarVisibility="Auto" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ComboField" DataType="{x:Type vm:EditableField}">
+            <StackPanel Margin="0,0,0,12">
+                <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource FieldHeader}" />
+                <ComboBox IsEditable="True" ItemsSource="{Binding Options}" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </DataTemplate>
+    </local:DialogWindow.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Title="Edit game info" ShowMaximize="False" ShowMinimize="False" />
+
+        <!--  Header  -->
+        <Grid Grid.Row="1" Margin="24,8,24,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Border Width="76" Height="108" Background="{StaticResource CoverPlaceholderBrush}" CornerRadius="6">
+                <Image Source="{Binding Game.CoverPath, Converter={StaticResource PathToImage}, ConverterParameter=160}" Stretch="UniformToFill" />
+            </Border>
+            <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding Game.Title}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Margin="0,2,0,0" Style="{StaticResource Muted}" Text="{Binding Subtitle}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                <TextBlock Margin="0,2,0,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" Text="{Binding TitleSourceText}" />
+            </StackPanel>
+            <ui:Button Grid.Column="2" VerticalAlignment="Center" Command="{Binding ManageArtCommand}" Content="Covers &amp; art…">
+                <ui:Button.Icon>
+                    <ui:SymbolIcon Symbol="ImageMultiple24" />
+                </ui:Button.Icon>
+            </ui:Button>
+        </Grid>
+
+        <TabControl Grid.Row="2" Margin="24,0,24,0">
+            <TabItem Header="Game info">
+                <ScrollViewer Padding="0,12,8,0" VerticalScrollBarVisibility="Auto">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ContentControl Grid.Row="0" Grid.ColumnSpan="3" Content="{Binding Fields[Title]}" ContentTemplate="{StaticResource TextField}" Focusable="False" />
+                        <ContentControl Grid.Row="1" Grid.Column="0" Content="{Binding Fields[Genre]}" ContentTemplate="{StaticResource TextField}" Focusable="False" />
+                        <ContentControl Grid.Row="1" Grid.Column="2" Content="{Binding Fields[Release]}" ContentTemplate="{StaticResource TextField}" Focusable="False" />
+                        <ContentControl Grid.Row="2" Grid.Column="0" Content="{Binding Fields[Developer]}" ContentTemplate="{StaticResource TextField}" Focusable="False" />
+                        <ContentControl Grid.Row="2" Grid.Column="2" Content="{Binding Fields[Publisher]}" ContentTemplate="{StaticResource TextField}" Focusable="False" />
+                        <ContentControl Grid.Row="3" Grid.Column="0" Content="{Binding Fields[Region]}" ContentTemplate="{StaticResource TextField}" Focusable="False" />
+                        <ContentControl Grid.Row="3" Grid.Column="2" Content="{Binding Fields[Language]}" ContentTemplate="{StaticResource TextField}" Focusable="False" />
+                        <ContentControl Grid.Row="4" Grid.ColumnSpan="3" Content="{Binding Fields[Description]}" ContentTemplate="{StaticResource MultilineField}" Focusable="False" />
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="OPL">
+                <ScrollViewer Padding="0,12,8,0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Margin="0,0,0,12" Style="{StaticResource Muted}" Text="Values OPL shows on its info page and uses when launching. They're written to CFG\&lt;ID&gt;.cfg on the device." />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <ContentControl Grid.Row="0" Grid.Column="0" Content="{Binding Fields[Players]}" ContentTemplate="{StaticResource ComboField}" Focusable="False" />
+                            <ContentControl Grid.Row="0" Grid.Column="2" Content="{Binding Fields[Rating]}" ContentTemplate="{StaticResource ComboField}" Focusable="False" />
+                            <ContentControl Grid.Row="0" Grid.Column="4" Content="{Binding Fields[Parental]}" ContentTemplate="{StaticResource ComboField}" Focusable="False" />
+                            <ContentControl Grid.Row="1" Grid.Column="0" Content="{Binding Fields[Vmode]}" ContentTemplate="{StaticResource ComboField}" Focusable="False" />
+                            <ContentControl Grid.Row="1" Grid.Column="2" Content="{Binding Fields[Scan]}" ContentTemplate="{StaticResource ComboField}" Focusable="False" />
+                            <ContentControl Grid.Row="1" Grid.Column="4" Content="{Binding Fields[Aspect]}" ContentTemplate="{StaticResource ComboField}" Focusable="False" />
+                        </Grid>
+
+                        <TextBlock Margin="0,8,0,8" Style="{StaticResource SectionHeader}" Text="Compatibility modes" />
+                        <ItemsControl ItemsSource="{Binding Compatibility}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:CompatibilityOption}">
+                                    <CheckBox Margin="0,0,0,6" IsChecked="{Binding IsChecked}">
+                                        <TextBlock>
+                                            <Run FontWeight="SemiBold" Text="{Binding Name, Mode=OneWay}" />
+                                            <Run Foreground="{StaticResource MutedTextBrush}" Text="{Binding Hint, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </CheckBox>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBlock Margin="0,12,0,8" Style="{StaticResource SectionHeader}" Text="Media type" />
+                        <StackPanel Orientation="Horizontal">
+                            <ComboBox Width="240" ItemsSource="{Binding MediaOptions}" SelectedItem="{Binding Media}" />
+                            <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Style="{StaticResource Muted}" Text="Decides whether the game goes in CD\ or DVD\ on the device." />
+                        </StackPanel>
+
+                        <Border Margin="0,16,0,8" Style="{StaticResource Panel}" Visibility="{Binding HasOplRoot, Converter={StaticResource BoolToVis}}">
+                            <DockPanel>
+                                <ui:Button Command="{Binding ImportFromOplCommand}" Content="Load from device" DockPanel.Dock="Right" IsEnabled="{Binding HasOplCfg}" />
+                                <StackPanel>
+                                    <TextBlock Text="Device CFG" />
+                                    <TextBlock Style="{StaticResource Muted}" Text="{Binding OplCfgPath}" />
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <!--  Footer  -->
+        <Border Grid.Row="3" Margin="0,12,0,0" Padding="24,14" Background="#FF17181C" BorderBrush="{StaticResource PanelBorderBrush}" BorderThickness="0,1,0,0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <ui:Button Margin="0,0,8,0" Command="{Binding CancelCommand}" Content="Cancel" />
+                    <ui:Button Appearance="Primary" Command="{Binding SaveCommand}" Content="Save" IsDefault="True">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="Save24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <ui:Button Appearance="Transparent" Command="{Binding ResetAllCommand}" Content="Reset all to database">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="ArrowReset24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                    <CheckBox Margin="16,0,0,0" Content="Also write to OPL device" IsChecked="{Binding WriteToOpl}" Visibility="{Binding HasOplRoot, Converter={StaticResource BoolToVis}}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</local:DialogWindow>

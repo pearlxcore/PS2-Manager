@@ -1,0 +1,120 @@
+<local:DialogWindow
+    x:Class="PS2Manager.App.Views.Dialogs.ArtManagerWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:PS2Manager.App.Views.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:vm="clr-namespace:PS2Manager.App.ViewModels"
+    Title="Covers &amp; art"
+    Width="1080"
+    Height="760"
+    MinWidth="760"
+    MinHeight="520"
+    d:DataContext="{d:DesignInstance vm:ArtManagerViewModel}"
+    mc:Ignorable="d">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Title="Covers &amp; art" ShowMinimize="False" />
+
+        <DockPanel Grid.Row="1" Margin="24,4,24,12">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" Text="Source" />
+                <ComboBox Width="210" ItemsSource="{Binding SourceOptions}" SelectedItem="{Binding SelectedSource}" />
+                <ui:Button Margin="8,0,0,0" Appearance="Primary" Command="{Binding DownloadMissingCommand}" Content="Download missing">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="ArrowDownload24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding Game.Title}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Style="{StaticResource Muted}" Text="{Binding Subtitle}" />
+            </StackPanel>
+        </DockPanel>
+
+        <ScrollViewer Grid.Row="2" Padding="18,0,18,0" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Slots}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:ArtSlot}">
+                        <Border
+                            Margin="6"
+                            Padding="10"
+                            AllowDrop="True"
+                            Drop="OnSlotDrop"
+                            DragOver="OnSlotDragOver"
+                            Style="{StaticResource Panel}"
+                            Tag="{Binding}">
+                            <StackPanel>
+                                <DockPanel Margin="0,0,0,8">
+                                    <TextBlock DockPanel.Dock="Right" FontSize="11" Foreground="{StaticResource MutedTextBrush}" Text="{Binding Suffix}" />
+                                    <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
+                                </DockPanel>
+                                <Border Height="190" Background="{StaticResource CoverPlaceholderBrush}" CornerRadius="6" Cursor="Hand" MouseLeftButtonUp="OnPreviewClick" Tag="{Binding}" ToolTip="Click to open · Drop an image here to replace">
+                                    <Grid>
+                                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding HasImage, Converter={StaticResource InverseBoolToVis}}">
+                                            <ui:SymbolIcon HorizontalAlignment="Center" FontSize="28" Foreground="{StaticResource MutedTextBrush}" Symbol="Image24" />
+                                            <TextBlock Margin="0,6,0,0" HorizontalAlignment="Center" FontSize="11" Foreground="{StaticResource MutedTextBrush}" Text="Drop image here" />
+                                        </StackPanel>
+                                        <Image Margin="4" Source="{Binding Path, Converter={StaticResource PathToImage}, ConverterParameter=400}" Stretch="Uniform" />
+                                        <ui:ProgressRing Width="36" Height="36" IsIndeterminate="True" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" />
+                                    </Grid>
+                                </Border>
+                                <TextBlock Margin="0,6,0,6" FontSize="11" Foreground="{StaticResource MutedTextBrush}" Text="{Binding Info}" TextTrimming="CharacterEllipsis" />
+                                <UniformGrid Columns="4">
+                                    <ui:Button Margin="0,0,3,0" Padding="6" HorizontalAlignment="Stretch" Command="{Binding DataContext.DownloadCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" ToolTip="Download">
+                                        <ui:Button.Icon>
+                                            <ui:SymbolIcon Symbol="ArrowDownload24" />
+                                        </ui:Button.Icon>
+                                    </ui:Button>
+                                    <ui:Button Margin="3,0" Padding="6" HorizontalAlignment="Stretch" Command="{Binding DataContext.BrowseCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" ToolTip="Choose file…">
+                                        <ui:Button.Icon>
+                                            <ui:SymbolIcon Symbol="FolderOpen24" />
+                                        </ui:Button.Icon>
+                                    </ui:Button>
+                                    <ui:Button Margin="3,0" Padding="6" HorizontalAlignment="Stretch" Command="{Binding DataContext.PasteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" ToolTip="Paste from clipboard">
+                                        <ui:Button.Icon>
+                                            <ui:SymbolIcon Symbol="ClipboardPaste24" />
+                                        </ui:Button.Icon>
+                                    </ui:Button>
+                                    <ui:Button Margin="3,0,0,0" Padding="6" HorizontalAlignment="Stretch" Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" IsEnabled="{Binding HasImage}" ToolTip="Remove">
+                                        <ui:Button.Icon>
+                                            <ui:SymbolIcon Symbol="Delete24" />
+                                        </ui:Button.Icon>
+                                    </ui:Button>
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <Border Grid.Row="3" Margin="0,12,0,0" Padding="24,14" Background="#FF17181C" BorderBrush="{StaticResource PanelBorderBrush}" BorderThickness="0,1,0,0">
+            <DockPanel>
+                <ui:Button Appearance="Primary" Click="OnClose" Content="Done" DockPanel.Dock="Right" IsDefault="True" />
+                <StackPanel Orientation="Horizontal">
+                    <ui:Button Margin="0,0,8,0" Command="{Binding OpenFolderCommand}" Content="Open art folder" />
+                    <ui:Button Command="{Binding ExportToOplCommand}" Content="Copy to OPL device">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="UsbStick24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</local:DialogWindow>

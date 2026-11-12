@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="PS2 Manager/PS2 Manager.csproj" />
+  <Project Path="PS2Manager.App/PS2Manager.App.csproj" />
+  <Project Path="PS2Manager.Core/PS2Manager.Core.csproj" />
+  <Project Path="PS2Manager.Tests/PS2Manager.Tests.csproj" />
 </Solution>

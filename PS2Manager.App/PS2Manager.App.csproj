@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>PS2 Manager</AssemblyName>
+    <RootNamespace>PS2Manager.App</RootNamespace>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>2.0.0</Version>
+    <Product>PS2 Manager</Product>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PS2Manager.Core\PS2Manager.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\app.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="System.IO" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,172 @@
+<Page
+    x:Class="PS2Manager.App.Views.Pages.ToolsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:vm="clr-namespace:PS2Manager.App.ViewModels"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    Title="Tools"
+    d:DataContext="{d:DesignInstance vm:ToolsViewModel}"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="980" Margin="24,8,24,24">
+            <TextBlock Style="{StaticResource PageTitle}" Text="Tools" />
+            <TextBlock Margin="0,4,0,16" Style="{StaticResource Muted}" Text="Batch operations on your library. File changes are previewed first and can be undone." />
+
+            <!--  Scope  -->
+            <Border Margin="0,0,0,16" Style="{StaticResource Panel}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="0,0,16,0" VerticalAlignment="Center" FontWeight="SemiBold" Text="Apply to" />
+                    <RadioButton Margin="0,0,16,0" Content="{Binding AllText}" GroupName="Scope" IsChecked="{Binding UseSelection, Converter={StaticResource InverseBool}}" />
+                    <RadioButton Content="{Binding SelectedText}" GroupName="Scope" IsChecked="{Binding UseSelection}" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource SectionHeader}" Text="Files" />
+            <ui:CardAction Command="{Binding RenameCommand}" Style="{StaticResource ToolCard}">
+                <ui:CardAction.Icon>
+                    <ui:SymbolIcon FontSize="24" Symbol="Rename24" />
+                </ui:CardAction.Icon>
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="Batch rename" />
+                    <TextBlock Style="{StaticResource Muted}" Text="Rename files from game info with tokens like {TITLE} [{GAME_ID}]. Preview every change before applying." />
+                </StackPanel>
+            </ui:CardAction>
+            <ui:CardAction Command="{Binding MoveToFoldersCommand}" Style="{StaticResource ToolCard}">
+                <ui:CardAction.Icon>
+                    <ui:SymbolIcon FontSize="24" Symbol="FolderArrowRight24" />
+                </ui:CardAction.Icon>
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="Move into folders" />
+                    <TextBlock Style="{StaticResource Muted}" Text="Give each game its own folder, named from a template." />
+                </StackPanel>
+            </ui:CardAction>
+            <ui:CardAction Command="{Binding FlattenCommand}" Style="{StaticResource ToolCard}">
+                <ui:CardAction.Icon>
+                    <ui:SymbolIcon FontSize="24" Symbol="ArrowMove24" />
+                </ui:CardAction.Icon>
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="Flatten into one folder" />
+                    <TextBlock Style="{StaticResource Muted}" Text="Move disc images out of subfolders into a single folder." />
+                </StackPanel>
+            </ui:CardAction>
+            <ui:CardAction Command="{Binding FixExtensionsCommand}" Style="{StaticResource ToolCard}">
+                <ui:CardAction.Icon>
+                    <ui:SymbolIcon FontSize="24" Symbol="DocumentEdit24" />
+                </ui:CardAction.Icon>
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="Fix file extensions" />
+                    <TextBlock Style="{StaticResource Muted}" Text="Raw CD images become .bin, normal images become .iso, based on the real sector layout." />
+                </StackPanel>
+            </ui:CardAction>
+            <ui:CardAction Command="{Binding FindDuplicatesCommand}" Style="{StaticResource ToolCard}">
+                <ui:CardAction.Icon>
+                    <ui:SymbolIcon FontSize="24" Symbol="DocumentCopy24" />
+                </ui:CardAction.Icon>
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="Find duplicates" />
+                    <TextBlock Style="{StaticResource Muted}" Text="Find identical copies or multiple dumps of the same game and send extras to the Recycle Bin." />
+                </StackPanel>
+            </ui:CardAction>
+
+            <!--  Undo  -->
+            <Border Margin="0,0,0,20" Style="{StaticResource Panel}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:SymbolIcon Margin="0,0,14,0" FontSize="24" Symbol="ArrowUndo24" />
+                    <StackPanel Grid.Column="1">
+                        <TextBlock FontWeight="SemiBold" Text="Undo last file operation" />
+                        <TextBlock Style="{StaticResource Muted}" Text="{Binding UndoText}" />
+                    </StackPanel>
+                    <ui:Button Grid.Column="2" Command="{Binding UndoCommand}" Content="Undo" />
+                </Grid>
+            </Border>
+
+            <TextBlock Style="{StaticResource SectionHeader}" Text="Art" />
+            <Border Margin="0,0,0,20" Style="{StaticResource Panel}">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Margin="0,0,14,0" FontSize="24" Symbol="ImageMultiple24" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock FontWeight="SemiBold" Text="Download covers &amp; art" />
+                            <TextBlock Style="{StaticResource Muted}" Text="Tries sources in the order set in Settings. Art you already have is skipped unless you choose to replace it." />
+                        </StackPanel>
+                        <ui:Button Grid.Column="2" Appearance="Primary" Command="{Binding DownloadArtCommand}" Content="Download">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="ArrowDownload24" />
+                            </ui:Button.Icon>
+                        </ui:Button>
+                    </Grid>
+                    <ItemsControl Margin="38,12,0,0" ItemsSource="{Binding ArtTypes}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox MinWidth="150" Margin="0,0,8,4" Content="{Binding Name}" IsChecked="{Binding IsChecked}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <CheckBox Margin="38,4,0,0" Content="Replace art I already have" IsChecked="{Binding OverwriteArt}" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource SectionHeader}" Text="Library" />
+            <ui:CardAction Command="{Binding ComputeCrcCommand}" Style="{StaticResource ToolCard}">
+                <ui:CardAction.Icon>
+                    <ui:SymbolIcon FontSize="24" Symbol="Fingerprint24" />
+                </ui:CardAction.Icon>
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="Calculate CRC32" />
+                    <TextBlock Style="{StaticResource Muted}" Text="Full-file checksum to compare with Redump. Slow: reads every byte." />
+                </StackPanel>
+            </ui:CardAction>
+            <ui:CardAction Command="{Binding ExportCommand}" Style="{StaticResource ToolCard}">
+                <ui:CardAction.Icon>
+                    <ui:SymbolIcon FontSize="24" Symbol="DocumentTable24" />
+                </ui:CardAction.Icon>
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="Export library" />
+                    <TextBlock Style="{StaticResource Muted}" Text="Excel, CSV or text, with the columns you choose." />
+                </StackPanel>
+            </ui:CardAction>
+            <ui:CardAction Command="{Binding UpdateDatabaseCommand}" Style="{StaticResource ToolCard}">
+                <ui:CardAction.Icon>
+                    <ui:SymbolIcon FontSize="24" Symbol="Database24" />
+                </ui:CardAction.Icon>
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="Update game database" />
+                    <TextBlock Style="{StaticResource Muted}" Text="Download the latest GameDB-PS2. Your own edits are kept." />
+                </StackPanel>
+            </ui:CardAction>
+            <ui:CardAction Command="{Binding ImportLegacyCommand}" Style="{StaticResource ToolCard}">
+                <ui:CardAction.Icon>
+                    <ui:SymbolIcon FontSize="24" Symbol="ArrowImport24" />
+                </ui:CardAction.Icon>
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="Import manifest from the old version" />
+                    <TextBlock Style="{StaticResource Muted}" Text="Bring in ps2_manifest.json from PS2 Manager 1.x." />
+                </StackPanel>
+            </ui:CardAction>
+
+            <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                <ui:HyperlinkButton Command="{Binding OpenDataFolderCommand}" Content="Open data folder" />
+                <ui:HyperlinkButton Margin="12,0,0,0" Command="{Binding OpenLogCommand}" Content="Open log" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -6,6 +6,8 @@
 
 A Windows tool for managing PS2 disc images, with support for Open PS2 Loader (OPL) and PCSX2.
 
+![PS2 Manager library](docs/screenshot.jpg)
+
 ## Features
 
 * Scan folders of `.iso` / `.bin` / `.img` files and identify each game from the disc
@@ -24,7 +26,7 @@ Upgrading from 1.x: use **Tools → Import manifest from the old version** to ke
 
 ## Notes
 
-* OPL can't load raw `.bin` CD images; convert them to ISO first.
+* Sending `.bin` images to OPL isn't supported for now.
 * Games over 4 GB need an exFAT-formatted OPL drive.
 * App data is stored in `%LocalAppData%\PS2Manager`. Set `PS2MANAGER_DATA` to use a different folder.
 

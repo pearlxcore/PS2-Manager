@@ -43,6 +43,13 @@
                         </StackPanel>
                     </DockPanel>
                     <DockPanel Margin="0,0,0,10">
+                        <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding CheckForUpdates}" />
+                        <StackPanel>
+                            <TextBlock Text="Check for updates on startup" />
+                            <TextBlock Style="{StaticResource Muted}" Text="Asks GitHub for a newer release and lets you know if there is one." />
+                        </StackPanel>
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,10">
                         <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding AutoScanOnStartup}" />
                         <StackPanel>
                             <TextBlock Text="Quick rescan on startup" />
@@ -239,6 +246,7 @@
                     <TextBlock Margin="0,2,0,0" Style="{StaticResource Muted}" Text="Copyright © pearlxcore" />
                     <WrapPanel Margin="0,8,0,0">
                         <ui:HyperlinkButton Command="{Binding OpenAboutCommand}" Content="About…" />
+                        <ui:HyperlinkButton Command="{Binding CheckUpdatesNowCommand}" Content="Check for updates" />
                         <ui:HyperlinkButton Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/niemasd/GameDB-PS2" Content="GameDB-PS2" />
                         <ui:HyperlinkButton Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/xlenore/ps2-covers" Content="xlenore/ps2-covers" />
                         <ui:HyperlinkButton Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/Luden02/psx-ps2-opl-art-database" Content="OPL art database" />

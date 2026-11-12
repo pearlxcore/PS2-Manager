@@ -17,7 +17,8 @@ public static class Http
         {
             Timeout = TimeSpan.FromMinutes(3),
         };
-        c.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PS2Manager", "2.0"));
+        var version = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "2";
+        c.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PS2Manager", version));
         return c;
     }
 }

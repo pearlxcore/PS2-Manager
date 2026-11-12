@@ -19,6 +19,10 @@ public sealed class AppSettings
     public List<string> Favorites { get; set; } = [];       // GameEntry.OverrideKey (game ID, or path for discs without one)
     public bool FavoritesFirst { get; set; } = true;
 
+    // Updates
+    public bool CheckForUpdates { get; set; } = true;
+    public string? SkippedUpdateVersion { get; set; }
+
     // Database
     public bool CheckDatabaseOnStartup { get; set; } = true;
 

@@ -26,9 +26,10 @@ public enum Pcsx2Boot { [Description("PCSX2 setting")] Default, [Description("Fa
 public sealed record Pcsx2LaunchOptions(Pcsx2Window Window = Pcsx2Window.Default, Pcsx2Boot Boot = Pcsx2Boot.Default,
     bool NoGui = false, bool BigPicture = false)
 {
-    public IReadOnlyList<string> BuildArguments(string discPath)
+    public IReadOnlyList<string> BuildArguments(string discPath, string? stateFile = null)
     {
         var args = new List<string>();
+        if (stateFile is not null) { args.Add("-statefile"); args.Add(stateFile); }
         if (Window == Pcsx2Window.Fullscreen) args.Add("-fullscreen");
         if (Window == Pcsx2Window.Windowed) args.Add("-nofullscreen");
         if (Boot == Pcsx2Boot.Fast) args.Add("-fastboot");
@@ -58,6 +59,22 @@ public sealed class Pcsx2Install
     public string CoversDir => Path.Combine(DataDir, "covers");
     public string IniPath => Path.Combine(DataDir, "inis", "PCSX2.ini");
     public string GameIndexPath => Path.Combine(ExeDir, "resources", "GameIndex.yaml");
+    public string SaveStatesDir => Path.Combine(DataDir, "sstates");
+
+    /// <summary>
+    /// PCSX2's automatic "resume" save state for a game: <c>SERIAL (CRC).resume.p2s</c>.
+    /// With a known CRC only that exact file counts; without one, every resume state for the serial is returned.
+    /// </summary>
+    public IReadOnlyList<string> FindResumeStates(string gameId, uint? crc)
+    {
+        if (string.IsNullOrEmpty(gameId) || !Directory.Exists(SaveStatesDir)) return [];
+        if (crc is { } c)
+        {
+            var exact = Path.Combine(SaveStatesDir, $"{gameId} ({c:X8}).resume.p2s");
+            return File.Exists(exact) ? [exact] : [];
+        }
+        return Directory.EnumerateFiles(SaveStatesDir, $"{gameId} (*).resume.p2s").ToList();
+    }
     public bool IsPortable => DataDir.Equals(ExeDir, StringComparison.OrdinalIgnoreCase);
 
     public string? Version
@@ -104,10 +121,10 @@ public sealed class Pcsx2Install
         return new Pcsx2Install(Path.GetFullPath(exe), portable ? dir : Path.Combine(documentsDir, "PCSX2"));
     }
 
-    public Process? Launch(string discPath, Pcsx2LaunchOptions options)
+    public Process? Launch(string discPath, Pcsx2LaunchOptions options, string? stateFile = null)
     {
         var psi = new ProcessStartInfo(ExePath) { UseShellExecute = false, WorkingDirectory = ExeDir };
-        foreach (var a in options.BuildArguments(discPath)) psi.ArgumentList.Add(a);
+        foreach (var a in options.BuildArguments(discPath, stateFile)) psi.ArgumentList.Add(a);
         Log.Write($"PCSX2 launch: {ExePath} {string.Join(' ', psi.ArgumentList)}");
         return Process.Start(psi);
     }

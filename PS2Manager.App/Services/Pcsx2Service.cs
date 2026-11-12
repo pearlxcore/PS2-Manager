@@ -1,6 +1,7 @@
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PS2Manager.Core;
+using PS2Manager.Core.Iso;
 using PS2Manager.Core.Models;
 using PS2Manager.Core.Pcsx2;
 
@@ -14,12 +15,14 @@ public sealed partial class Pcsx2Service : ObservableObject
 {
     private readonly LibraryService _library;
     private readonly NotifyService _notify;
+    private readonly DialogService _dialogs;
     private Dictionary<string, Pcsx2Compat> _compat = new(StringComparer.OrdinalIgnoreCase);
 
-    public Pcsx2Service(LibraryService library, NotifyService notify)
+    public Pcsx2Service(LibraryService library, NotifyService notify, DialogService dialogs)
     {
         _library = library;
         _notify = notify;
+        _dialogs = dialogs;
         library.LibraryChanged += (_, _) => ApplyCompat();
         Detect();
     }
@@ -74,20 +77,57 @@ public sealed partial class Pcsx2Service : ObservableObject
 
     public bool CanPlay(GameEntry? g) => IsAvailable && g is { FileMissing: false };
 
-    public void Play(GameEntry game)
+    public async Task PlayAsync(GameEntry game)
     {
         if (Install is not { } i) { _notify.Warning("PCSX2 not found", "Set the PCSX2 location in Settings."); return; }
         if (!File.Exists(game.IsoPath)) { _notify.Error("File not found", game.IsoPath); return; }
         try
         {
-            i.Launch(game.IsoPath, _library.Settings.Pcsx2Options);
-            _notify.Info("Starting PCSX2", game.Title);
+            string? state = null;
+            if (await FindResumeStateAsync(i, game) is { } resume)
+            {
+                var saved = File.GetLastWriteTime(resume);
+                int choice = await _dialogs.ChooseAsync("Resume game?",
+                    $"{game.Title} has a resume point from {saved:d MMM yyyy, HH:mm} ({Ago(saved)}).\n\nContinue where you left off?",
+                    "Yes", "No");
+                if (choice < 0) return;          // cancelled: don't launch
+                if (choice == 0) state = resume;
+            }
+
+            i.Launch(game.IsoPath, _library.Settings.Pcsx2Options, state);
+            _notify.Info(state is null ? "Starting PCSX2" : "Resuming in PCSX2", game.Title);
         }
         catch (Exception ex)
         {
             Log.Error("PCSX2 launch", ex);
             _notify.Error("Couldn't start PCSX2", ex.Message);
         }
+    }
+
+    /// <summary>
+    /// Finds this game's resume state. Uses the PCSX2 CRC when known; if it isn't yet and there are several
+    /// candidates (different versions of the game), the CRC is computed now (reads the boot ELF, ~0.5 s).
+    /// </summary>
+    private static async Task<string?> FindResumeStateAsync(Pcsx2Install install, GameEntry game)
+    {
+        if (!game.HasGameId) return null;
+        var states = install.FindResumeStates(game.GameId, game.Pcsx2Crc);
+        if (states.Count <= 1 || game.Pcsx2Crc is not null) return states.FirstOrDefault();
+
+        var crc = await Task.Run(() => DiscReader.ComputeElfCrc(game.IsoPath, game.BootElf));
+        if (crc is null) return null;
+        game.Pcsx2Crc = crc;
+        return install.FindResumeStates(game.GameId, crc).FirstOrDefault();
+    }
+
+    private static string Ago(DateTime t)
+    {
+        var d = DateTime.Now - t;
+        return d.TotalMinutes < 1 ? "just now"
+            : d.TotalHours < 1 ? $"{(int)d.TotalMinutes} min ago"
+            : d.TotalDays < 1 ? $"{(int)d.TotalHours} h ago"
+            : d.TotalDays < 2 ? "yesterday"
+            : $"{(int)d.TotalDays} days ago";
     }
 
     public async Task ExportCoversAsync(bool overwrite)

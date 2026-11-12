@@ -122,6 +122,13 @@ public partial class LibraryPage : UserControl
 
         if (e.OriginalSource is TextBox) return;   // don't steal keys from text input
 
+        if (e.Key == Key.D && Keyboard.Modifiers == ModifierKeys.Control && _vm.ToggleFavoriteCommand.CanExecute(null))
+        {
+            _vm.ToggleFavoriteCommand.Execute(null);
+            e.Handled = true;
+            return;
+        }
+
         switch (e.Key)
         {
             case Key.Enter when Keyboard.Modifiers == ModifierKeys.Control && _vm.PlayCommand.CanExecute(null):

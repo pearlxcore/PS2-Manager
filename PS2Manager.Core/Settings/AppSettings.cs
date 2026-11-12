@@ -16,6 +16,8 @@ public sealed class AppSettings
     public bool ShowDetailsPane { get; set; } = true;
     public List<string> HiddenColumns { get; set; } = ["Disc"];
     public Dictionary<string, double> ColumnWidths { get; set; } = [];
+    public List<string> Favorites { get; set; } = [];       // GameEntry.OverrideKey (game ID, or path for discs without one)
+    public bool FavoritesFirst { get; set; } = true;
 
     // Database
     public bool CheckDatabaseOnStartup { get; set; } = true;

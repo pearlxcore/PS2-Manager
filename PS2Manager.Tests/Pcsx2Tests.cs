@@ -13,6 +13,32 @@ public class Pcsx2Tests
     }
 
     [Fact]
+    public void LaunchArguments_ResumeStateComesBeforeFile()
+    {
+        var args = new Pcsx2LaunchOptions().BuildArguments("game.iso", @"C:\s\SLUS-20062 (ABCD1234).resume.p2s");
+        Assert.Equal(["-statefile", @"C:\s\SLUS-20062 (ABCD1234).resume.p2s", "--", "game.iso"], args);
+    }
+
+    [Fact]
+    public void ResumeStates_MatchByCrcWhenKnown()
+    {
+        string dir = Directory.CreateTempSubdirectory().FullName;
+        try
+        {
+            var install = new Pcsx2Install(Path.Combine(dir, Pcsx2Install.ExeName), dir);
+            Directory.CreateDirectory(install.SaveStatesDir);
+            foreach (var f in new[] { "SLUS-20062 (0000ABCD).resume.p2s", "SLUS-20062 (1111EEEE).resume.p2s", "SLUS-20062 (0000ABCD).01.p2s", "SLUS-29999 (22223333).resume.p2s" })
+                File.WriteAllText(Path.Combine(install.SaveStatesDir, f), "");
+
+            Assert.Single(install.FindResumeStates("SLUS-20062", 0xABCD));
+            Assert.Empty(install.FindResumeStates("SLUS-20062", 0x12345678));
+            Assert.Equal(2, install.FindResumeStates("SLUS-20062", null).Count);
+            Assert.Empty(install.FindResumeStates("SLUS-11111", null));
+        }
+        finally { Directory.Delete(dir, true); }
+    }
+
+    [Fact]
     public void LaunchArguments_DefaultsPassNoOverrides()
     {
         var args = new Pcsx2LaunchOptions().BuildArguments("game.iso");

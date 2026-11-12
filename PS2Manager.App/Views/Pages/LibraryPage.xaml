@@ -29,6 +29,11 @@
                     <ui:SymbolIcon Symbol="Edit24" />
                 </MenuItem.Icon>
             </MenuItem>
+            <MenuItem Command="{Binding ToggleFavoriteCommand}" Header="{Binding FavoriteMenuText}" InputGestureText="Ctrl+D">
+                <MenuItem.Icon>
+                    <ui:SymbolIcon Symbol="Star24" />
+                </MenuItem.Icon>
+            </MenuItem>
             <MenuItem Command="{Binding ManageArtCommand}" Header="Covers &amp; art…">
                 <MenuItem.Icon>
                     <ui:SymbolIcon Symbol="ImageMultiple24" />
@@ -269,6 +274,7 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="{x:Type core:GameEntry}">
                             <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                <ui:SymbolIcon Margin="0,0,6,0" VerticalAlignment="Center" FontSize="14" Filled="True" Foreground="#FFF2C14B" Symbol="Star24" ToolTip="Favorite" Visibility="{Binding IsFavorite, Converter={StaticResource BoolToVis}}" />
                                 <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding Title}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Title}" />
                                 <Border Margin="8,0,0,0" Padding="6,0" Background="#33B48CFF" CornerRadius="6" ToolTip="You edited this game's info" Visibility="{Binding HasOverrides, Converter={StaticResource BoolToVis}}">
                                     <TextBlock FontSize="11" Foreground="{StaticResource EditedBrush}" Text="edited" />
@@ -332,6 +338,9 @@
                                     <!--  Hover highlight  -->
                                     <Border Background="#1AFFFFFF" CornerRadius="6" Visibility="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListViewItem}, Converter={StaticResource BoolToVis}}" />
                                 </Grid>
+                            </Border>
+                            <Border Margin="6" Padding="4,3" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#CC16171B" CornerRadius="5" ToolTip="Favorite" Visibility="{Binding IsFavorite, Converter={StaticResource BoolToVis}}">
+                                <ui:SymbolIcon FontSize="13" Filled="True" Foreground="#FFF2C14B" Symbol="Star24" />
                             </Border>
                             <!--  Only badges the box art can't tell you  -->
                             <StackPanel Margin="6" HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal">
@@ -426,7 +435,31 @@
                             </Grid>
                         </Border>
 
-                        <TextBlock Margin="0,14,0,6" FontSize="18" FontWeight="SemiBold" Text="{Binding Title}" TextWrapping="Wrap" />
+                        <DockPanel Margin="0,14,0,6">
+                            <ui:Button
+                                Margin="8,0,0,0"
+                                Padding="6"
+                                VerticalAlignment="Top"
+                                Appearance="Transparent"
+                                Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                DockPanel.Dock="Right"
+                                ToolTip="Add to or remove from favorites (Ctrl+D)">
+                                <ui:SymbolIcon FontSize="20" Symbol="Star24">
+                                    <ui:SymbolIcon.Style>
+                                        <Style TargetType="ui:SymbolIcon">
+                                            <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                                    <Setter Property="Filled" Value="True" />
+                                                    <Setter Property="Foreground" Value="#FFF2C14B" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ui:SymbolIcon.Style>
+                                </ui:SymbolIcon>
+                            </ui:Button>
+                            <TextBlock FontSize="18" FontWeight="SemiBold" Text="{Binding Title}" TextWrapping="Wrap" />
+                        </DockPanel>
 
                         <WrapPanel>
                             <Border Style="{StaticResource Chip}">

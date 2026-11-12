@@ -36,6 +36,9 @@ public sealed partial class GameEntry : ObservableObject
     /// <summary>PCSX2 compatibility from its GameIndex.yaml (not persisted; filled when PCSX2 is found).</summary>
     [ObservableProperty][property: JsonIgnore] private Pcsx2Compat _pcsx2Compat;
 
+    /// <summary>Marked as favorite (stored in settings by <see cref="OverrideKey"/>, applied on load).</summary>
+    [ObservableProperty][property: JsonIgnore] private bool _isFavorite;
+
     /// <summary>The background PCSX2 CRC pass tried this disc and could not read its ELF.</summary>
     public bool ElfCrcFailed { get; set; }
 

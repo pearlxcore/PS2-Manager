@@ -38,6 +38,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         var s = library.Settings;
         _autoScanOnStartup = s.AutoScanOnStartup;
         _autoDownloadCovers = s.AutoDownloadCovers;
+        _favoritesFirst = s.FavoritesFirst;
         _scanParallelism = s.ScanParallelism;
         _renameTemplate = s.RenameTemplate;
         _folderTemplate = s.FolderTemplate;
@@ -70,6 +71,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private bool _autoScanOnStartup;
     [ObservableProperty] private bool _autoDownloadCovers;
+    [ObservableProperty] private bool _favoritesFirst;
     [ObservableProperty] private int _scanParallelism;
     [ObservableProperty] private string _renameTemplate;
     [ObservableProperty] private string _folderTemplate;
@@ -79,6 +81,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     partial void OnAutoScanOnStartupChanged(bool value) => Save(s => s.AutoScanOnStartup = value);
     partial void OnAutoDownloadCoversChanged(bool value) => Save(s => s.AutoDownloadCovers = value);
+    partial void OnFavoritesFirstChanged(bool value) { Save(s => s.FavoritesFirst = value); _libraryVm.ReapplySort(); }
     partial void OnScanParallelismChanged(int value) => Save(s => s.ScanParallelism = value);
     partial void OnRenameTemplateChanged(string value) => Save(s => s.RenameTemplate = value);
     partial void OnFolderTemplateChanged(string value) => Save(s => s.FolderTemplate = value);

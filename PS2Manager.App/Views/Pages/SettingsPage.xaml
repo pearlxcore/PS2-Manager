@@ -32,9 +32,16 @@
             </Border>
 
             <!--  Startup & scanning  -->
-            <TextBlock Style="{StaticResource SectionHeader}" Text="Startup &amp; scanning" />
+            <TextBlock Style="{StaticResource SectionHeader}" Text="Library" />
             <Border Margin="0,0,0,20" Style="{StaticResource Panel}">
                 <StackPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding FavoritesFirst}" />
+                        <StackPanel>
+                            <TextBlock Text="Show favorites at the top" />
+                            <TextBlock Style="{StaticResource Muted}" Text="Favorites come first in both views, whatever the sort order. Add one with Ctrl+D or the star." />
+                        </StackPanel>
+                    </DockPanel>
                     <DockPanel Margin="0,0,0,10">
                         <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding AutoScanOnStartup}" />
                         <StackPanel>

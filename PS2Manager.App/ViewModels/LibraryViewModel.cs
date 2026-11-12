@@ -22,6 +22,7 @@ public enum StatusFilter
     [Description("Not in database")] NotInDatabase,
     [Description("Problems (unreadable / missing file)")] Problems,
     [Description("Multi-disc")] MultiDisc,
+    [Description("Favorites")] Favorites,
 }
 
 public enum LibrarySort
@@ -74,7 +75,7 @@ public sealed partial class LibraryViewModel : ObservableObject
     public Pcsx2Service Pcsx2 { get; }
 
     [RelayCommand(CanExecute = nameof(CanPlay))]
-    private void Play() { if (SelectedGame is { } g) Pcsx2.Play(g); }
+    private async Task Play() { if (SelectedGame is { } g) await Pcsx2.PlayAsync(g); }
     private bool CanPlay() => Pcsx2.CanPlay(SelectedGame);
     public ICollectionView GamesView { get; }
 
@@ -104,8 +105,9 @@ public sealed partial class LibraryViewModel : ObservableObject
             OnPropertyChanged();
             OnPropertyChanged(nameof(HasSelection));
             OnPropertyChanged(nameof(SelectionText));
+            OnPropertyChanged(nameof(FavoriteMenuText));
             UpdateCountText();
-            foreach (var c in new IRelayCommand[] { RenameCommand, MoveToFoldersCommand, DeleteFilesCommand, RemoveFromLibraryCommand,
+            foreach (var c in new IRelayCommand[] { ToggleFavoriteCommand, RenameCommand, MoveToFoldersCommand, DeleteFilesCommand, RemoveFromLibraryCommand,
                          DownloadArtForSelectionCommand, ComputeCrcCommand, SendToOplCommand })
                 c.NotifyCanExecuteChanged();
         }
@@ -157,11 +159,46 @@ public sealed partial class LibraryViewModel : ObservableObject
                 case LibrarySort.GameId: By(nameof(GameEntry.GameId)); break;
             }
             By(nameof(GameEntry.Title));
+            if (_library.Settings.FavoritesFirst)
+                GamesView.SortDescriptions.Insert(0, new SortDescription(nameof(GameEntry.IsFavorite), ListSortDirection.Descending));
         }
     }
 
+    // ------------------------------------------------------------------ favorites
+
+    private void ApplyFavorites()
+    {
+        var keys = new HashSet<string>(_library.Settings.Favorites, StringComparer.OrdinalIgnoreCase);
+        foreach (var g in _library.Games) g.IsFavorite = keys.Contains(g.OverrideKey);
+    }
+
+    /// <summary>Re-applies sorting after the "favorites first" setting changes.</summary>
+    public void ReapplySort() { ApplySort(); RefreshView(); }
+
+    /// <summary>Adds the selection to favorites, or removes it when every selected game is already a favorite.</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ToggleFavorite()
+    {
+        var games = Targets;
+        if (games.Count == 0) return;
+        bool add = games.Any(g => !g.IsFavorite);
+        var favs = _library.Settings.Favorites;
+        foreach (var g in games)
+        {
+            favs.RemoveAll(k => k.Equals(g.OverrideKey, StringComparison.OrdinalIgnoreCase));
+            if (add) favs.Add(g.OverrideKey);
+            g.IsFavorite = add;
+        }
+        _library.Settings.Save();
+        RefreshView();
+        OnPropertyChanged(nameof(FavoriteMenuText));
+    }
+
+    public string FavoriteMenuText => Targets.Count > 0 && Targets.All(g => g.IsFavorite) ? "Remove from favorites" : "Add to favorites";
+
     public void RefreshView()
     {
+        ApplyFavorites();
         GamesView.Refresh();
         _shownCount = GamesView.Cast<object>().Count();
         UpdateCountText();
@@ -194,6 +231,7 @@ public sealed partial class LibraryViewModel : ObservableObject
         void Flag(string label, int n, StatusFilter f) { if (n > 0) list.Add(new(label, n.ToString("N0"), f)); }
         Flag("Missing cover", Count(g => g.CoverPath is null), StatusFilter.MissingCover);
         Flag("Not in database", Count(g => !g.InDatabase), StatusFilter.NotInDatabase);
+        Flag("Favorites", Count(g => g.IsFavorite), StatusFilter.Favorites);
         Flag("Edited by me", Count(g => g.HasOverrides), StatusFilter.Edited);
         Flag("Problems", Count(g => g.FileMissing || !g.IsValid), StatusFilter.Problems);
         Stats = list;
@@ -233,6 +271,7 @@ public sealed partial class LibraryViewModel : ObservableObject
             StatusFilter.NotInDatabase => !g.InDatabase,
             StatusFilter.Problems => g.FileMissing || !g.IsValid,
             StatusFilter.MultiDisc => g.IsMultiDisc,
+            StatusFilter.Favorites => g.IsFavorite,
             _ => true,
         };
     }

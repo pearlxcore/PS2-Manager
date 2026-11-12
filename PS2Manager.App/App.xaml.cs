@@ -33,6 +33,7 @@ public partial class App : Application
         sc.AddSingleton<DialogService>();
         sc.AddSingleton<NotifyService>();
         sc.AddSingleton<BackgroundCrcService>();
+        sc.AddSingleton<Pcsx2Service>();
 
         sc.AddSingleton<MainWindowViewModel>();
         sc.AddSingleton<LibraryViewModel>();

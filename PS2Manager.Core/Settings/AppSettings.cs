@@ -1,5 +1,6 @@
 using PS2Manager.Core.Art;
 using PS2Manager.Core.Opl;
+using PS2Manager.Core.Pcsx2;
 using PS2Manager.Core.Rename;
 
 namespace PS2Manager.Core.Settings;
@@ -36,6 +37,16 @@ public sealed class AppSettings
     public bool OplWriteCfg { get; set; } = true;
     public bool OplExportArt { get; set; } = true;
     public bool AutoWriteCfgOnSave { get; set; } = false;
+
+    // PCSX2 (launch options only; everything else stays in PCSX2's own settings)
+    public string? Pcsx2ExePath { get; set; }
+    public Pcsx2Window Pcsx2Window { get; set; } = Pcsx2Window.Default;
+    public Pcsx2Boot Pcsx2Boot { get; set; } = Pcsx2Boot.Default;
+    public bool Pcsx2NoGui { get; set; }
+    public bool Pcsx2BigPicture { get; set; }
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Pcsx2LaunchOptions Pcsx2Options => new(Pcsx2Window, Pcsx2Boot, Pcsx2NoGui, Pcsx2BigPicture);
 
     // Window
     public double WindowWidth { get; set; } = 1400;

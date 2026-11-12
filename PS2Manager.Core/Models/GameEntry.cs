@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using PS2Manager.Core.Pcsx2;
 
 namespace PS2Manager.Core.Models;
 
@@ -31,6 +32,9 @@ public sealed partial class GameEntry : ObservableObject
     public DiscType DetectedDiscType { get; set; }
     public bool IsRawCdImage { get; set; }
     [ObservableProperty] private uint? _pcsx2Crc;
+
+    /// <summary>PCSX2 compatibility from its GameIndex.yaml (not persisted; filled when PCSX2 is found).</summary>
+    [ObservableProperty][property: JsonIgnore] private Pcsx2Compat _pcsx2Compat;
 
     /// <summary>The background PCSX2 CRC pass tried this disc and could not read its ELF.</summary>
     public bool ElfCrcFailed { get; set; }

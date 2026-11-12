@@ -124,6 +124,8 @@ public partial class LibraryPage : UserControl
 
         switch (e.Key)
         {
+            case Key.Enter when Keyboard.Modifiers == ModifierKeys.Control && _vm.PlayCommand.CanExecute(null):
+                _vm.PlayCommand.Execute(null); e.Handled = true; break;
             case Key.Enter when _vm.EditInfoCommand.CanExecute(null):
                 _vm.EditInfoCommand.Execute(null); e.Handled = true; break;
             case Key.F2 when _vm.RenameCommand.CanExecute(null):

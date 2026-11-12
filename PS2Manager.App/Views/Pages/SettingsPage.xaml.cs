@@ -9,5 +9,6 @@ public partial class SettingsPage : UserControl
     {
         DataContext = vm;
         InitializeComponent();
+        IsVisibleChanged += (_, e) => { if (e.NewValue is true) vm.RefreshPcsx2(); };
     }
 }

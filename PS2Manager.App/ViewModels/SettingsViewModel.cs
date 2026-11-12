@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using PS2Manager.App.Services;
 using PS2Manager.Core;
 using PS2Manager.Core.Art;
+using PS2Manager.Core.Pcsx2;
 using PS2Manager.Core.Rename;
 
 namespace PS2Manager.App.ViewModels;
@@ -25,8 +26,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly DialogService _dialogs;
     private readonly NotifyService _notify;
 
-    public SettingsViewModel(LibraryService library, LibraryViewModel libraryVm, MainWindowViewModel main, DialogService dialogs, NotifyService notify)
+    public SettingsViewModel(LibraryService library, LibraryViewModel libraryVm, MainWindowViewModel main, DialogService dialogs, NotifyService notify, Pcsx2Service pcsx2)
     {
+        Pcsx2 = pcsx2;
         _library = library;
         _libraryVm = libraryVm;
         _main = main;
@@ -40,6 +42,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         _renameTemplate = s.RenameTemplate;
         _folderTemplate = s.FolderTemplate;
         _conflictMode = s.ConflictMode;
+        _pcsx2Window = s.Pcsx2Window;
+        _pcsx2Boot = s.Pcsx2Boot;
+        _pcsx2NoGui = s.Pcsx2NoGui;
+        _pcsx2BigPicture = s.Pcsx2BigPicture;
 
         // Enabled sources in priority order, then the disabled ones.
         var ordered = s.ArtSourceOrder.Select(ArtSourceCatalog.Find).OfType<IArtSource>().ToList();
@@ -77,6 +83,59 @@ public sealed partial class SettingsViewModel : ObservableObject
     partial void OnRenameTemplateChanged(string value) => Save(s => s.RenameTemplate = value);
     partial void OnFolderTemplateChanged(string value) => Save(s => s.FolderTemplate = value);
     partial void OnConflictModeChanged(ConflictMode value) => Save(s => s.ConflictMode = value);
+
+    // ------------------------------------------------------------------ PCSX2
+
+    public Pcsx2Service Pcsx2 { get; }
+    public Pcsx2Window[] Pcsx2WindowOptions { get; } = Enum.GetValues<Pcsx2Window>();
+    public Pcsx2Boot[] Pcsx2BootOptions { get; } = Enum.GetValues<Pcsx2Boot>();
+
+    [ObservableProperty] private Pcsx2Window _pcsx2Window;
+    [ObservableProperty] private Pcsx2Boot _pcsx2Boot;
+    [ObservableProperty] private bool _pcsx2NoGui;
+    [ObservableProperty] private bool _pcsx2BigPicture;
+    [ObservableProperty] private string _pcsx2FolderStatus = "";
+
+    partial void OnPcsx2WindowChanged(Pcsx2Window value) => Save(s => s.Pcsx2Window = value);
+    partial void OnPcsx2BootChanged(Pcsx2Boot value) => Save(s => s.Pcsx2Boot = value);
+    partial void OnPcsx2NoGuiChanged(bool value) => Save(s => s.Pcsx2NoGui = value);
+    partial void OnPcsx2BigPictureChanged(bool value) => Save(s => s.Pcsx2BigPicture = value);
+
+    /// <summary>Called when the Settings page is shown, so the folder status reflects PCSX2's current ini.</summary>
+    public void RefreshPcsx2()
+    {
+        if (!Pcsx2.IsAvailable) { Pcsx2FolderStatus = ""; return; }
+        var missing = Pcsx2.MissingGameListFolders();
+        Pcsx2FolderStatus = missing.Count == 0
+            ? "PCSX2 already scans all your library folders."
+            : $"Not in PCSX2's game list yet: {string.Join(", ", missing)}";
+    }
+
+    [RelayCommand]
+    private void BrowsePcsx2()
+    {
+        var exe = _dialogs.PickFile("Choose pcsx2-qt.exe", "PCSX2|pcsx2-qt.exe;pcsx2*.exe|Programs|*.exe");
+        if (exe is null) return;
+        if (Pcsx2.SetExe(exe)) _notify.Success("PCSX2 found", Pcsx2.Status);
+        RefreshPcsx2();
+    }
+
+    [RelayCommand] private void DetectPcsx2() { Pcsx2.Detect(); RefreshPcsx2(); }
+    [RelayCommand] private void OpenPcsx2Data() { if (Pcsx2.Install is { } i) ShellService.ShowInExplorer(i.DataDir); }
+    [RelayCommand] private Task ExportPcsx2Covers() => Pcsx2.ExportCoversAsync(overwrite: false);
+
+    [RelayCommand]
+    private async Task AddFoldersToPcsx2()
+    {
+        var missing = Pcsx2.MissingGameListFolders();
+        if (missing.Count == 0) { _notify.Info("Nothing to add", "PCSX2 already scans all your library folders."); return; }
+        if (!await _dialogs.ConfirmAsync("Add folders to PCSX2",
+                "Add these folders to PCSX2's game list?\n\n" + string.Join("\n", missing) +
+                "\n\nPCSX2 must be closed. A backup of PCSX2.ini is saved next to it.", "Add"))
+            return;
+        Pcsx2.AddFoldersToGameList();
+        RefreshPcsx2();
+    }
 
     private void Save(Action<Core.Settings.AppSettings> change)
     {

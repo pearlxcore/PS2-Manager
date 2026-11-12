@@ -18,6 +18,12 @@
     <UserControl.Resources>
         <!--  Shared context menu for grid and cover wall (DataContext = LibraryViewModel)  -->
         <ContextMenu x:Key="GameMenu">
+            <MenuItem Command="{Binding PlayCommand}" FontWeight="SemiBold" Header="Play in PCSX2" InputGestureText="Ctrl+Enter">
+                <MenuItem.Icon>
+                    <ui:SymbolIcon Symbol="Play24" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator />
             <MenuItem Command="{Binding EditInfoCommand}" Header="Edit game info…" InputGestureText="Enter">
                 <MenuItem.Icon>
                     <ui:SymbolIcon Symbol="Edit24" />
@@ -281,6 +287,7 @@
                 <DataGridTextColumn Width="80" Binding="{Binding SizeDisplay}" Header="Size" SortMemberPath="SizeBytes" />
                 <DataGridTextColumn Width="60" Binding="{Binding Version}" Header="Ver" />
                 <DataGridTextColumn Width="1.3*" MinWidth="80" Binding="{Binding Genre}" Header="Genre" />
+                <DataGridTextColumn Width="80" Binding="{Binding Pcsx2Compat, Converter={StaticResource EnumText}}" Header="PCSX2" SortMemberPath="Pcsx2Compat" />
                 <DataGridTextColumn Width="1.6*" MinWidth="120" Binding="{Binding FileName}" Header="File" />
             </DataGrid.Columns>
         </ui:DataGrid>
@@ -445,9 +452,48 @@
                             <Border Background="#33F0616D" Style="{StaticResource Chip}" Visibility="{Binding IsValid, Converter={StaticResource InverseBoolToVis}}">
                                 <TextBlock FontSize="12" Foreground="{StaticResource DangerBrush}" Text="{Binding Validity, Converter={StaticResource EnumText}}" />
                             </Border>
+                            <Border ToolTip="PCSX2 compatibility rating from its game database">
+                                <Border.Style>
+                                    <Style BasedOn="{StaticResource Chip}" TargetType="Border">
+                                        <Setter Property="Background" Value="#3345C08A" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Pcsx2Compat}" Value="Unknown">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Pcsx2Compat}" Value="InGame">
+                                                <Setter Property="Background" Value="#33F2B84B" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Pcsx2Compat}" Value="Menus">
+                                                <Setter Property="Background" Value="#33F0616D" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Pcsx2Compat}" Value="Intro">
+                                                <Setter Property="Background" Value="#33F0616D" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Pcsx2Compat}" Value="Nothing">
+                                                <Setter Property="Background" Value="#33F0616D" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock FontSize="12">
+                                    <Run Text="PCSX2: " /><Run Text="{Binding Pcsx2Compat, Mode=OneWay, Converter={StaticResource EnumText}}" />
+                                </TextBlock>
+                            </Border>
                         </WrapPanel>
 
-                        <UniformGrid Margin="0,8,0,0" Columns="3">
+                        <ui:Button
+                            Margin="0,10,0,0"
+                            HorizontalAlignment="Stretch"
+                            Appearance="Primary"
+                            Command="{Binding DataContext.PlayCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            Content="Play in PCSX2"
+                            ToolTip="Launch with your PCSX2 settings (Ctrl+Enter)"
+                            Visibility="{Binding DataContext.Pcsx2.IsAvailable, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="Play24" />
+                            </ui:Button.Icon>
+                        </ui:Button>
+                        <UniformGrid Margin="0,6,0,0" Columns="3">
                             <ui:Button Margin="0,0,4,0" HorizontalAlignment="Stretch" Command="{Binding DataContext.EditInfoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Content="Edit" ToolTip="Edit game info">
                                 <ui:Button.Icon>
                                     <ui:SymbolIcon Symbol="Edit24" />

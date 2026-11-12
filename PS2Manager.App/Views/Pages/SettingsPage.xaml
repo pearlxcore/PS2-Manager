@@ -59,6 +59,83 @@
                 </StackPanel>
             </Border>
 
+            <!--  PCSX2  -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="PCSX2" />
+            <Border Margin="0,0,0,20" Style="{StaticResource Panel}">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,12">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <ui:Button Margin="0,0,6,0" Command="{Binding DetectPcsx2Command}" Content="Detect" />
+                            <ui:Button Margin="0,0,6,0" Command="{Binding BrowsePcsx2Command}" Content="Choose…" />
+                            <ui:Button Command="{Binding OpenPcsx2DataCommand}" Content="Open data" Visibility="{Binding Pcsx2.IsAvailable, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="PCSX2 location" />
+                            <TextBlock Style="{StaticResource Muted}" Text="{Binding Pcsx2.Status}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <StackPanel IsEnabled="{Binding Pcsx2.IsAvailable}">
+                        <TextBlock Margin="0,0,0,8" Style="{StaticResource Muted}" Text="Play uses your PCSX2 settings (controllers, graphics, BIOS, per-game settings). Only how the game starts is set here." TextWrapping="Wrap" />
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="160" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock VerticalAlignment="Center" Text="Window" />
+                            <ComboBox Grid.Column="1" Width="240" HorizontalAlignment="Left" ItemsSource="{Binding Pcsx2WindowOptions}" SelectedItem="{Binding Pcsx2Window}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumText}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBlock Grid.Row="1" Margin="0,8,0,0" VerticalAlignment="Center" Text="Boot" />
+                            <ComboBox Grid.Row="1" Grid.Column="1" Width="240" Margin="0,8,0,0" HorizontalAlignment="Left" ItemsSource="{Binding Pcsx2BootOptions}" SelectedItem="{Binding Pcsx2Boot}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumText}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </Grid>
+                        <DockPanel Margin="0,0,0,10">
+                            <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding Pcsx2NoGui}" />
+                            <StackPanel>
+                                <TextBlock Text="Game only" />
+                                <TextBlock Style="{StaticResource Muted}" Text="Hide PCSX2's main window while playing; it closes when the game stops." />
+                            </StackPanel>
+                        </DockPanel>
+                        <DockPanel Margin="0,0,0,14">
+                            <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding Pcsx2BigPicture}" />
+                            <StackPanel>
+                                <TextBlock Text="Big Picture mode" />
+                                <TextBlock Style="{StaticResource Muted}" Text="PCSX2's controller-friendly full-screen interface." />
+                            </StackPanel>
+                        </DockPanel>
+
+                        <DockPanel Margin="0,0,0,10">
+                            <ui:Button Command="{Binding ExportPcsx2CoversCommand}" Content="Copy covers" DockPanel.Dock="Right" />
+                            <StackPanel>
+                                <TextBlock Text="Share covers" />
+                                <TextBlock Style="{StaticResource Muted}" Text="Copy your front covers into PCSX2's covers folder (named by serial). Covers PCSX2 already has are kept." TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DockPanel>
+                        <DockPanel>
+                            <ui:Button Command="{Binding AddFoldersToPcsx2Command}" Content="Add folders" DockPanel.Dock="Right" />
+                            <StackPanel>
+                                <TextBlock Text="Share library folders" />
+                                <TextBlock Style="{StaticResource Muted}" Text="{Binding Pcsx2FolderStatus}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DockPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
             <!--  Art sources  -->
             <TextBlock Style="{StaticResource SectionHeader}" Text="Art sources" />
             <Border Margin="0,0,0,20" Style="{StaticResource Panel}">
@@ -151,7 +228,7 @@
                     <TextBlock FontWeight="SemiBold">
                         <Run Text="PS2 Manager " /><Run Text="{Binding Version, Mode=OneWay}" />
                     </TextBlock>
-                    <TextBlock Margin="0,6,0,0" Style="{StaticResource Muted}" Text="Game data from GameDB-PS2 · Covers from xlenore/ps2-covers and the OPL Manager art database archive · Disc reading by DiscUtils · UI by WPF-UI." />
+                    <TextBlock Margin="0,6,0,0" Style="{StaticResource Muted}" Text="Game data from GameDB-PS2 · Compatibility ratings from PCSX2 · Covers from xlenore/ps2-covers and the OPL Manager art database archive · Disc reading by DiscUtils · UI by WPF-UI." />
                     <WrapPanel Margin="0,8,0,0">
                         <ui:HyperlinkButton Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/niemasd/GameDB-PS2" Content="GameDB-PS2" />
                         <ui:HyperlinkButton Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/xlenore/ps2-covers" Content="xlenore/ps2-covers" />

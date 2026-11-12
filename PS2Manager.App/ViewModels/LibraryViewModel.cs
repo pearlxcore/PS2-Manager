@@ -45,8 +45,10 @@ public sealed partial class LibraryViewModel : ObservableObject
     private readonly NotifyService _notify;
     private readonly DispatcherTimer _searchDebounce;
 
-    public LibraryViewModel(LibraryService library, ActivityService activity, DialogService dialogs, NotifyService notify)
+    public LibraryViewModel(LibraryService library, ActivityService activity, DialogService dialogs, NotifyService notify, Pcsx2Service pcsx2)
     {
+        Pcsx2 = pcsx2;
+        pcsx2.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Pcsx2Service.IsAvailable)) PlayCommand.NotifyCanExecuteChanged(); };
         _library = library;
         _activity = activity;
         _dialogs = dialogs;
@@ -69,6 +71,11 @@ public sealed partial class LibraryViewModel : ObservableObject
     }
 
     public LibraryService Library => _library;
+    public Pcsx2Service Pcsx2 { get; }
+
+    [RelayCommand(CanExecute = nameof(CanPlay))]
+    private void Play() { if (SelectedGame is { } g) Pcsx2.Play(g); }
+    private bool CanPlay() => Pcsx2.CanPlay(SelectedGame);
     public ICollectionView GamesView { get; }
 
     public IReadOnlyList<string> RegionOptions { get; } = ["All regions", "NTSC-U", "PAL", "NTSC-J", "NTSC-K", "Other"];
@@ -84,7 +91,7 @@ public sealed partial class LibraryViewModel : ObservableObject
     [ObservableProperty] private string _countText = "";
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(EditInfoCommand), nameof(ManageArtCommand), nameof(ShowInExplorerCommand))]
+    [NotifyCanExecuteChangedFor(nameof(EditInfoCommand), nameof(ManageArtCommand), nameof(ShowInExplorerCommand), nameof(PlayCommand))]
     private GameEntry? _selectedGame;
 
     private IReadOnlyList<GameEntry> _selectedGames = [];

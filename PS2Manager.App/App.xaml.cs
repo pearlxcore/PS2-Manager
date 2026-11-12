@@ -32,6 +32,7 @@ public partial class App : Application
         sc.AddSingleton<ActivityService>();
         sc.AddSingleton<DialogService>();
         sc.AddSingleton<NotifyService>();
+        sc.AddSingleton<BackgroundCrcService>();
 
         sc.AddSingleton<MainWindowViewModel>();
         sc.AddSingleton<LibraryViewModel>();
@@ -61,6 +62,7 @@ public partial class App : Application
         {
             var lib = Services.GetService<LibraryService>();
             if (lib?.IsLoaded == true) lib.Save();
+            Services.GetService<BackgroundCrcService>()?.Stop();
             lib?.Settings.Save();
         }
         catch { }

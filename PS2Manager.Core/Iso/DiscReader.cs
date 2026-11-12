@@ -20,7 +20,11 @@ public static partial class DiscReader
     public static bool IsSupported(string path) =>
         SupportedExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
 
-    public static GameEntry Read(string path)
+    /// <param name="computeElfCrc">
+    /// Also read the whole boot ELF for the PCSX2 CRC. That's several MB per disc, the bulk of
+    /// the I/O, so library scans skip it and fill it in later with <see cref="ComputeElfCrc"/>.
+    /// </param>
+    public static GameEntry Read(string path, bool computeElfCrc = true)
     {
         var fi = new FileInfo(path);
         var entry = new GameEntry
@@ -39,7 +43,7 @@ public static partial class DiscReader
 
         try
         {
-            using var file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
             using var opened = Open(file);
             if (opened is null)
             {
@@ -76,7 +80,7 @@ public static partial class DiscReader
                 return entry;
             }
 
-            entry.Pcsx2Crc = TryComputeElfCrc(cd, entry.BootElf);
+            if (computeElfCrc) entry.Pcsx2Crc = TryComputeElfCrc(cd, entry.BootElf);
             entry.Validity = DiscValidity.Valid;
         }
         catch (Exception ex)
@@ -86,6 +90,24 @@ public static partial class DiscReader
         }
 
         return entry;
+    }
+
+    /// <summary>PCSX2 CRC of a disc's boot ELF, or null if it can't be read.</summary>
+    public static uint? ComputeElfCrc(string path, string bootElf)
+    {
+        try
+        {
+            using var file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
+            using var opened = Open(file);
+            if (opened is null) return null;
+            var (cd, _, _) = opened;
+            return TryComputeElfCrc(cd, bootElf);
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"ELF CRC {path}", ex);
+            return null;
+        }
     }
 
     /// <summary>Real layout from the file size: raw CD images are multiples of 2352 and not 2048.</summary>

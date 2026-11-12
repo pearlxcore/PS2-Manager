@@ -268,3 +268,62 @@ public class LibraryAndToolsTests
         Assert.Equal(p2, store.Get("slus_200.62", ArtType.Cover));
     }
 }
+
+public class PerformanceBehaviourTests
+{
+    [Fact]
+    public async Task Scan_SkipsElfCrc_ButKeepsEarlierValueOnFullRescan()
+    {
+        using var tmp = new TempDir();
+        string iso = Path.Combine(tmp.Path, "a.iso");
+        File.WriteAllBytes(iso, TestDiscs.BuildIso());
+
+        var first = await LibraryScanner.ScanAsync([tmp.Path], [], fullRescan: false);
+        var g = first.Games.Single();
+        Assert.Null(g.Pcsx2Crc);                                   // not read during the scan
+        Assert.Equal("SLUS-20062", g.GameId);
+
+        g.Pcsx2Crc = DiscReader.ComputeElfCrc(iso, g.BootElf);       // what the background pass does
+        Assert.NotNull(g.Pcsx2Crc);
+        Assert.Equal(DiscReader.Read(iso).Pcsx2Crc, g.Pcsx2Crc);    // same result as a full read
+
+        var full = await LibraryScanner.ScanAsync([tmp.Path], first.Games, fullRescan: true);
+        Assert.NotSame(g, full.Games.Single());                      // disc was re-read…
+        Assert.Equal(g.Pcsx2Crc, full.Games.Single().Pcsx2Crc);      // …but the CRC carried over
+    }
+
+    [Fact]
+    public void ComputeElfCrc_MissingFile_ReturnsNull() =>
+        Assert.Null(DiscReader.ComputeElfCrc(@"C:\definitely\not\here.iso", "SLUS_200.62;1"));
+
+    private sealed class FakeSource(Func<ArtImage?> fetch) : IArtSource
+    {
+        public string Id => "fake";
+        public string Name => "Fake";
+        public string Description => "";
+        public bool Supports(ArtType type) => true;
+        public Task<ArtImage?> FetchAsync(string gameId, ArtType type, CancellationToken ct) => Task.FromResult(fetch());
+    }
+
+    [Fact]
+    public async Task MissCache_RecordsNotFound_ButNotNetworkFailures()
+    {
+        using var tmp = new TempDir();
+        var misses = new ArtMissCache(Path.Combine(tmp.Path, "misses.json"));
+        var dl = new ArtDownloader(new ArtStore(Path.Combine(tmp.Path, "art")), misses);
+
+        var notFound = new FakeSource(() => null);
+        var offline = new FakeSource(() => throw new HttpRequestException("offline"));
+
+        var r1 = await dl.DownloadManyAsync(["SLUS-20062"], [ArtType.Cover], [offline], overwrite: false);
+        Assert.Equal(1, r1.Failed);
+        Assert.False(misses.IsRecentMiss("SLUS-20062", ArtType.Cover));
+
+        var r2 = await dl.DownloadManyAsync(["SLUS-20062"], [ArtType.Cover], [notFound], overwrite: false);
+        Assert.Equal(1, r2.NotFound);
+        Assert.True(new ArtMissCache(Path.Combine(tmp.Path, "misses.json")).IsRecentMiss("SLUS-20062", ArtType.Cover));  // persisted
+
+        var r3 = await dl.DownloadManyAsync(["SLUS-20062"], [ArtType.Cover], [notFound], overwrite: false, skipRecentMisses: true);
+        Assert.Equal(1, r3.Skipped);
+    }
+}

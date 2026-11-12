@@ -296,7 +296,8 @@ public sealed partial class LibraryViewModel : ObservableObject
             var progress = new Progress<ArtDownloadProgress>(p =>
                 scope.Report($"Downloading art {p.Done:N0} / {p.Total:N0} · {p.Downloaded:N0} found", (double)p.Done / p.Total));
             var result = await _library.Downloader.DownloadManyAsync(
-                withIds.Select(g => g.GameId), types, _library.Settings.ResolveArtSources(), overwrite, progress, scope.Token);
+                withIds.Select(g => g.GameId), types, _library.Settings.ResolveArtSources(), overwrite, progress, scope.Token,
+                skipRecentMisses: quiet);   // automatic runs skip art that wasn't found recently
 
             foreach (var g in withIds) _library.RefreshCover(g);
             RefreshView();

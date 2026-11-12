@@ -5,7 +5,6 @@
     xmlns:conv="clr-namespace:PS2Manager.App.Converters">
 
     <!--  Converters  -->
-    <conv:PathToImageConverter x:Key="PathToImage" />
     <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
     <conv:BoolToVisibilityConverter x:Key="InverseBoolToVis" Invert="True" />
     <conv:NullToVisibilityConverter x:Key="NullToCollapsed" />

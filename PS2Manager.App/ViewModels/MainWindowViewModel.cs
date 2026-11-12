@@ -10,11 +10,13 @@ public sealed partial class MainWindowViewModel(
     LibraryViewModel libraryVm,
     ActivityService activity,
     DialogService dialogs,
-    NotifyService notify) : ObservableObject
+    NotifyService notify,
+    BackgroundCrcService backgroundCrc) : ObservableObject
 {
     public LibraryService Library => library;
     public LibraryViewModel LibraryVm => libraryVm;
     public ActivityService Activity => activity;
+    public BackgroundCrcService BackgroundCrc => backgroundCrc;
 
     /// <summary>Startup: load cached library, offer database download, then refresh in the background.</summary>
     public async Task StartupAsync()

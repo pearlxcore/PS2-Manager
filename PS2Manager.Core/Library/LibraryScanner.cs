@@ -49,6 +49,7 @@ public static class LibraryScanner
         var files = await Task.Run(() => FindDiscFiles(folders), ct);
         var results = new ConcurrentDictionary<string, GameEntry>(StringComparer.OrdinalIgnoreCase);
         int done = 0, reused = 0;
+        long lastReport = 0;
 
         await Parallel.ForEachAsync(files,
             new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, parallelism), CancellationToken = ct },
@@ -65,15 +66,24 @@ public static class LibraryScanner
                 }
                 else
                 {
-                    entry = DiscReader.Read(path);
-                    // Keep a computed full CRC if the file did not change.
+                    // Identity only: the boot-ELF CRC is ~85% of the I/O and is filled in later in the background.
+                    entry = DiscReader.Read(path, computeElfCrc: false);
+                    // Keep checksums computed earlier if the file did not change.
                     if (known.TryGetValue(path, out var old) && old.SizeBytes == entry.SizeBytes && old.LastWriteUtc == entry.LastWriteUtc)
+                    {
                         entry.Crc32 = old.Crc32;
+                        entry.Pcsx2Crc = old.Pcsx2Crc;
+                        entry.ElfCrcFailed = old.ElfCrcFailed;
+                    }
                 }
-                entry.FileMissing = false;
+                if (entry.FileMissing) entry.FileMissing = false;
                 results[path] = entry;
                 int n = Interlocked.Increment(ref done);
-                progress?.Report(new ScanProgress(n, files.Count, Path.GetFileName(path)));
+
+                // At most ~10 progress updates per second, so the UI thread isn't flooded on fast (cached) scans.
+                long now = Environment.TickCount64, last = Interlocked.Read(ref lastReport);
+                if (n == files.Count || (now - last >= 100 && Interlocked.CompareExchange(ref lastReport, now, last) == last))
+                    progress?.Report(new ScanProgress(n, files.Count, Path.GetFileName(path)));
                 return ValueTask.CompletedTask;
             });
 

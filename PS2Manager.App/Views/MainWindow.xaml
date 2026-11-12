@@ -95,6 +95,11 @@
                         Margin="16,0,0,0"
                         Foreground="{StaticResource MutedTextBrush}"
                         Text="{Binding Library.DatabaseStatus}" />
+                    <TextBlock
+                        Margin="16,0,0,0"
+                        Foreground="{StaticResource MutedTextBrush}"
+                        Text="{Binding BackgroundCrc.Status}"
+                        ToolTip="Reading each game's boot file in the background for the PCSX2 CRC. Pauses during other tasks." />
                 </StackPanel>
 
                 <StackPanel

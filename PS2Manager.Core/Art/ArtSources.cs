@@ -28,6 +28,7 @@ public abstract class UrlArtSource : IArtSource
     {
         if (!GameIds.IsKnown(gameId) || !Supports(type)) return null;
 
+        Exception? transient = null;
         foreach (var url in Urls(gameId, type))
         {
             for (int attempt = 1; attempt <= 3; attempt++)
@@ -36,7 +37,7 @@ public abstract class UrlArtSource : IArtSource
                 try
                 {
                     using var resp = await Http.Client.GetAsync(url, ct);
-                    if (resp.StatusCode == HttpStatusCode.NotFound) break;            // try next URL
+                    if (resp.StatusCode == HttpStatusCode.NotFound) break;            // definitive: try next URL
                     if (resp.IsSuccessStatusCode)
                     {
                         var bytes = await resp.Content.ReadAsByteArrayAsync(ct);
@@ -44,14 +45,17 @@ public abstract class UrlArtSource : IArtSource
                         return new ArtImage(bytes, ArtStore.NormalizeExt(Path.GetExtension(url), bytes), Name);
                     }
                     if ((int)resp.StatusCode is >= 400 and < 500 and not 429) break;  // permanent
+                    if (attempt == 3) transient = new HttpRequestException($"HTTP {(int)resp.StatusCode} from {url}");
                 }
                 catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
-                catch (Exception ex) when (attempt == 3) { Log.Error($"Art fetch {url}", ex); }
+                catch (Exception ex) when (attempt == 3) { transient = ex; Log.Error($"Art fetch {url}", ex); }
                 catch { /* transient: retry */ }
 
-                await Task.Delay(TimeSpan.FromSeconds(attempt * 1.5), ct);
+                if (attempt < 3) await Task.Delay(TimeSpan.FromSeconds(attempt * 1.5), ct);
             }
         }
+        // Network trouble is not the same as "this art doesn't exist": callers must not cache it as a miss.
+        if (transient is not null) throw new HttpRequestException($"{Name}: {transient.Message}", transient);
         return null;
     }
 }

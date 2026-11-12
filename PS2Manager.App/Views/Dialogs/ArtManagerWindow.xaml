@@ -2,6 +2,7 @@
     x:Class="PS2Manager.App.Views.Dialogs.ArtManagerWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="clr-namespace:PS2Manager.App.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:PS2Manager.App.Views.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -69,7 +70,7 @@
                                             <ui:SymbolIcon HorizontalAlignment="Center" FontSize="28" Foreground="{StaticResource MutedTextBrush}" Symbol="Image24" />
                                             <TextBlock Margin="0,6,0,0" HorizontalAlignment="Center" FontSize="11" Foreground="{StaticResource MutedTextBrush}" Text="Drop image here" />
                                         </StackPanel>
-                                        <Image Margin="4" Source="{Binding Path, Converter={StaticResource PathToImage}, ConverterParameter=400}" Stretch="Uniform" />
+                                        <Image Margin="4" conv:AsyncImage.Path="{Binding Path}" conv:AsyncImage.DecodeWidth="400" Stretch="Uniform" />
                                         <ui:ProgressRing Width="36" Height="36" IsIndeterminate="True" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" />
                                     </Grid>
                                 </Border>

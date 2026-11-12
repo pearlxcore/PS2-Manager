@@ -30,7 +30,10 @@ public sealed partial class GameEntry : ObservableObject
     public int DiscNumber { get; set; } = 1;
     public DiscType DetectedDiscType { get; set; }
     public bool IsRawCdImage { get; set; }
-    public uint? Pcsx2Crc { get; set; }
+    [ObservableProperty] private uint? _pcsx2Crc;
+
+    /// <summary>The background PCSX2 CRC pass tried this disc and could not read its ELF.</summary>
+    public bool ElfCrcFailed { get; set; }
 
     [ObservableProperty] private uint? _crc32;
     [ObservableProperty] private DiscValidity _validity = DiscValidity.Valid;

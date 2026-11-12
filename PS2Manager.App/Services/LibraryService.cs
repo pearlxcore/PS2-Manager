@@ -24,7 +24,7 @@ public sealed partial class LibraryService : ObservableObject
         Overrides = new OverrideStore(AppPaths.OverridesFile);
         Resolver = new MetadataResolver(() => _database, Overrides);
         Art = new ArtStore(AppPaths.ArtDir);
-        Downloader = new ArtDownloader(Art);
+        Downloader = new ArtDownloader(Art, new ArtMissCache(AppPaths.ArtMissesFile));
         History = new RenameHistory(AppPaths.RenameHistoryFile);
         Opl = new OplService(Art);
     }
@@ -105,12 +105,17 @@ public sealed partial class LibraryService : ObservableObject
         foreach (var f in folders)
             if (!Folders.Contains(f, StringComparer.OrdinalIgnoreCase)) Folders.Add(f);
 
-        var result = await LibraryScanner.ScanAsync(folders, Games.ToList(), fullRescan, progress, ct, Settings.ScanParallelism);
+        var before = Games.ToList();
+        var result = await LibraryScanner.ScanAsync(folders, before, fullRescan, progress, ct, Settings.ScanParallelism);
+
+        // Only entries that were (re)read need resolving. Re-resolving reused entries already bound
+        // to the UI fired thousands of cross-thread property notifications and made the app stutter.
+        var existing = new HashSet<GameEntry>(before, ReferenceEqualityComparer.Instance);
+        var fresh = result.Games.Where(g => !existing.Contains(g)).ToList();
         await Task.Run(() =>
         {
-            foreach (var g in result.Games)
+            foreach (var g in fresh)
             {
-                if (!LibraryScanner.IsUnder(g.IsoPath, folders)) continue;   // untouched entries keep their state
                 Resolver.Resolve(g);
                 g.CoverPath = Art.Get(g.GameId, ArtType.Cover);
             }

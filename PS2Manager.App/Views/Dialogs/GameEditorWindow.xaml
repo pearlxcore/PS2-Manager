@@ -2,6 +2,7 @@
     x:Class="PS2Manager.App.Views.Dialogs.GameEditorWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="clr-namespace:PS2Manager.App.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:PS2Manager.App.Views.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -80,7 +81,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Border Width="76" Height="108" Background="{StaticResource CoverPlaceholderBrush}" CornerRadius="6">
-                <Image Source="{Binding Game.CoverPath, Converter={StaticResource PathToImage}, ConverterParameter=160}" Stretch="UniformToFill" />
+                <Image conv:AsyncImage.Path="{Binding Game.CoverPath}" conv:AsyncImage.DecodeWidth="160" Stretch="UniformToFill" />
             </Border>
             <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
                 <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding Game.Title}" TextTrimming="CharacterEllipsis" />

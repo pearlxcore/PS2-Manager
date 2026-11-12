@@ -26,6 +26,7 @@ public static class AppPaths
     public static string OverridesFile => Path.Combine(Root, "overrides.json");
     public static string SettingsFile => Path.Combine(Root, "settings.json");
     public static string RenameHistoryFile => Path.Combine(Root, "rename-history.json");
+    public static string ArtMissesFile => Path.Combine(Root, "art-misses.json");
     public static string LogFile => Path.Combine(LogDir, "debug.log");
 
     private static string Ensure(string dir)

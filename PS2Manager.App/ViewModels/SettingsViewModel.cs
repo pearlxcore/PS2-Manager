@@ -195,6 +195,9 @@ public sealed partial class SettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(DatabaseStatus));
     }
 
+    [RelayCommand]
+    private void OpenAbout() => _dialogs.ShowDialog(new Views.Dialogs.AboutWindow());
+
     [RelayCommand] private void OpenDataFolder() => ShellService.ShowInExplorer(AppPaths.Root);
     [RelayCommand] private static void OpenUrl(string url) => ShellService.Open(url);
 }

@@ -56,6 +56,12 @@
                         <TextBlock Margin="14,0,0,0" VerticalAlignment="Center" Text="Settings" />
                     </StackPanel>
                 </RadioButton>
+                <Button AutomationProperties.Name="About" Click="OnAbout" DockPanel.Dock="Bottom" Style="{StaticResource NavAction}">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Info24" />
+                        <TextBlock Margin="14,0,0,0" VerticalAlignment="Center" Text="About" />
+                    </StackPanel>
+                </Button>
                 <Border Height="1" Margin="0,4" Background="{StaticResource PanelBorderBrush}" DockPanel.Dock="Bottom" />
                 <StackPanel>
                     <RadioButton x:Name="NavLibrary" AutomationProperties.Name="Library" Checked="OnNavChecked" Style="{StaticResource NavItem}" Tag="Library">

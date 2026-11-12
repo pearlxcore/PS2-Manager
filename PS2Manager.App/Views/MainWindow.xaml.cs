@@ -64,6 +64,9 @@ public partial class MainWindow : FluentWindow
             page.Visibility = name == key ? Visibility.Visible : Visibility.Collapsed;
     }
 
+    private void OnAbout(object sender, RoutedEventArgs e) =>
+        new Dialogs.AboutWindow { Owner = this, WindowStartupLocation = WindowStartupLocation.CenterOwner }.ShowDialog();
+
     private void OnTogglePane(object sender, RoutedEventArgs e)
     {
         var collapse = NavPane.Width > 100;
@@ -78,11 +81,12 @@ public partial class MainWindow : FluentWindow
                 }
     }
 
-    private static IEnumerable<System.Windows.Controls.RadioButton> FindNavItems(DependencyObject root)
+    private static IEnumerable<System.Windows.Controls.ContentControl> FindNavItems(DependencyObject root)
     {
         foreach (var child in LogicalTreeHelper.GetChildren(root).OfType<DependencyObject>())
         {
-            if (child is System.Windows.Controls.RadioButton rb) yield return rb;
+            // Nav items and nav actions: icon + label panels.
+            if (child is System.Windows.Controls.Primitives.ButtonBase { Content: System.Windows.Controls.Panel } item) yield return item;
             else foreach (var nested in FindNavItems(child)) yield return nested;
         }
     }

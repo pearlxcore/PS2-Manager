@@ -1,4 +1,4 @@
-<Page
+<UserControl
     x:Class="PS2Manager.App.Views.Pages.LibraryPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -9,15 +9,13 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:PS2Manager.App.ViewModels"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-    ScrollViewer.CanContentScroll="False"
-    Title="Library"
     d:DataContext="{d:DesignInstance vm:LibraryViewModel}"
     d:DesignHeight="800"
     d:DesignWidth="1200"
     AllowDrop="True"
     mc:Ignorable="d">
 
-    <Page.Resources>
+    <UserControl.Resources>
         <!--  Shared context menu for grid and cover wall (DataContext = LibraryViewModel)  -->
         <ContextMenu x:Key="GameMenu">
             <MenuItem Command="{Binding EditInfoCommand}" Header="Edit game info…" InputGestureText="Enter">
@@ -74,7 +72,7 @@
                 </MenuItem.Icon>
             </MenuItem>
         </ContextMenu>
-    </Page.Resources>
+    </UserControl.Resources>
 
     <Grid Margin="18,8,18,12">
         <Grid.ColumnDefinitions>
@@ -291,6 +289,7 @@
             ItemsSource="{Binding GamesView}"
             MouseDoubleClick="OnItemDoubleClick"
             ScrollViewer.CanContentScroll="True"
+            VirtualizingPanel.ScrollUnit="Pixel"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
             SelectedItem="{Binding SelectedGame}"
             SelectionChanged="OnCoverSelectionChanged"
@@ -303,7 +302,7 @@
             </ListView.Resources>
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <ui:VirtualizingWrapPanel Orientation="Vertical" SpacingMode="Uniform" StretchItems="False" />
+                    <ui:VirtualizingWrapPanel MouseWheelDelta="140" ScrollLineDelta="40" Orientation="Vertical" SpacingMode="Uniform" StretchItems="False" />
                 </ItemsPanelTemplate>
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>
@@ -404,17 +403,17 @@
                         </WrapPanel>
 
                         <UniformGrid Margin="0,8,0,0" Columns="3">
-                            <ui:Button Margin="0,0,4,0" HorizontalAlignment="Stretch" Command="{Binding DataContext.EditInfoCommand, RelativeSource={RelativeSource AncestorType=Page}}" Content="Edit" ToolTip="Edit game info">
+                            <ui:Button Margin="0,0,4,0" HorizontalAlignment="Stretch" Command="{Binding DataContext.EditInfoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Content="Edit" ToolTip="Edit game info">
                                 <ui:Button.Icon>
                                     <ui:SymbolIcon Symbol="Edit24" />
                                 </ui:Button.Icon>
                             </ui:Button>
-                            <ui:Button Margin="2,0" HorizontalAlignment="Stretch" Command="{Binding DataContext.ManageArtCommand, RelativeSource={RelativeSource AncestorType=Page}}" Content="Art">
+                            <ui:Button Margin="2,0" HorizontalAlignment="Stretch" Command="{Binding DataContext.ManageArtCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Content="Art">
                                 <ui:Button.Icon>
                                     <ui:SymbolIcon Symbol="ImageMultiple24" />
                                 </ui:Button.Icon>
                             </ui:Button>
-                            <ui:Button Margin="4,0,0,0" HorizontalAlignment="Stretch" Command="{Binding DataContext.ShowInExplorerCommand, RelativeSource={RelativeSource AncestorType=Page}}" Content="Folder">
+                            <ui:Button Margin="4,0,0,0" HorizontalAlignment="Stretch" Command="{Binding DataContext.ShowInExplorerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Content="Folder">
                                 <ui:Button.Icon>
                                     <ui:SymbolIcon Symbol="FolderOpen24" />
                                 </ui:Button.Icon>
@@ -501,4 +500,4 @@
             </Grid>
         </Border>
     </Grid>
-</Page>
+</UserControl>

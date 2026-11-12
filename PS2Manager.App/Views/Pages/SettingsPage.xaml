@@ -1,18 +1,17 @@
-<Page
+<UserControl
     x:Class="PS2Manager.App.Views.Pages.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:conv="clr-namespace:PS2Manager.App.Converters"
     xmlns:vm="clr-namespace:PS2Manager.App.ViewModels"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-    ScrollViewer.CanContentScroll="False"
-    Title="Settings"
     d:DataContext="{d:DesignInstance vm:SettingsViewModel}"
     mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer Background="Transparent" VerticalScrollBarVisibility="Auto">
         <StackPanel MaxWidth="900" Margin="24,8,24,24">
             <TextBlock Margin="0,0,0,16" Style="{StaticResource PageTitle}" Text="Settings" />
 
@@ -24,7 +23,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ListBox MinHeight="90" MaxHeight="200" ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedFolder}" />
+                    <ListBox conv:WheelBubble.Enabled="True" MinHeight="90" MaxHeight="200" ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedFolder}" />
                     <StackPanel Grid.Column="1" Margin="10,0,0,0">
                         <ui:Button Margin="0,0,0,6" HorizontalAlignment="Stretch" Command="{Binding AddFolderCommand}" Content="Add…" />
                         <ui:Button HorizontalAlignment="Stretch" Command="{Binding RemoveFolderCommand}" Content="Remove" />
@@ -68,7 +67,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ListBox ItemsSource="{Binding ArtSources}" SelectedItem="{Binding SelectedSource}">
+                    <ListBox conv:WheelBubble.Enabled="True" ItemsSource="{Binding ArtSources}" SelectedItem="{Binding SelectedSource}">
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:ArtSourceOption}">
                                 <StackPanel Margin="0,2" Orientation="Horizontal">
@@ -162,4 +161,4 @@
             </Border>
         </StackPanel>
     </ScrollViewer>
-</Page>
+</UserControl>

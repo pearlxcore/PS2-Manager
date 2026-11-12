@@ -48,7 +48,7 @@ public partial class App : Application
 
         Services = sc.BuildServiceProvider();
 
-        ApplicationThemeManager.Apply(ApplicationTheme.Dark, Wpf.Ui.Controls.WindowBackdropType.Mica, true);
+        ApplicationThemeManager.Apply(ApplicationTheme.Dark, Wpf.Ui.Controls.WindowBackdropType.None, true);
         ApplicationAccentColorManager.Apply(Color.FromRgb(0x4C, 0x8D, 0xFF), ApplicationTheme.Dark);
 
         var window = Services.GetRequiredService<MainWindow>();

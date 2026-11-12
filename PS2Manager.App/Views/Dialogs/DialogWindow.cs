@@ -4,15 +4,19 @@ using Wpf.Ui.Controls;
 
 namespace PS2Manager.App.Views.Dialogs;
 
-/// <summary>Common look and behaviour for tool windows: Mica, custom title bar, Esc closes.</summary>
+/// <summary>Common look and behaviour for tool windows: solid dark background, custom title bar, Esc closes.</summary>
 public class DialogWindow : FluentWindow
 {
     public DialogWindow()
     {
         ExtendsContentIntoTitleBar = true;
-        WindowBackdropType = WindowBackdropType.Mica;
+        // Solid background: Mica made every dialog open/close recompose the whole desktop area.
+        WindowBackdropType = WindowBackdropType.None;
+        Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1B, 0x1C, 0x20));
         WindowCornerPreference = WindowCornerPreference.Round;
         ShowInTaskbar = false;
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        ContentRendered += (_, _) => PS2Manager.Core.Log.Write($"{GetType().Name} shown in {sw.ElapsedMilliseconds} ms");
         PreviewKeyDown += (_, e) =>
         {
             if (e.Key == Key.Escape && e.OriginalSource is not System.Windows.Controls.ComboBox) { Close(); e.Handled = true; }

@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:pages="clr-namespace:PS2Manager.App.Views.Pages"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:PS2Manager.App.ViewModels"
     Title="PS2 Manager"
@@ -15,7 +14,8 @@
     d:DataContext="{d:DesignInstance vm:MainWindowViewModel}"
     ExtendsContentIntoTitleBar="True"
     Icon="/Assets/app.ico"
-    WindowBackdropType="Mica"
+    Background="#FF141518"
+    WindowBackdropType="None"
     WindowCornerPreference="Round"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
@@ -37,43 +37,58 @@
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
-        <ui:NavigationView
-            x:Name="RootNavigation"
-            Grid.Row="1"
-            IsBackButtonVisible="Collapsed"
-            IsPaneToggleVisible="True"
-            OpenPaneLength="210"
-            PaneDisplayMode="Left">
-            <ui:NavigationView.MenuItems>
-                <ui:NavigationViewItem Content="Library" TargetPageType="{x:Type pages:LibraryPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="Library24" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-                <ui:NavigationViewItem Content="Tools" TargetPageType="{x:Type pages:ToolsPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="Wrench24" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-                <ui:NavigationViewItem Content="OPL Device" TargetPageType="{x:Type pages:OplPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="UsbStick24" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-            </ui:NavigationView.MenuItems>
-            <ui:NavigationView.FooterMenuItems>
-                <ui:NavigationViewItem Content="Settings" TargetPageType="{x:Type pages:SettingsPage}">
-                    <ui:NavigationViewItem.Icon>
+        <!--  Navigation: every page stays loaded and is only shown/hidden, so switching is instant.  -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <DockPanel x:Name="NavPane" Width="210" Margin="6,0,6,8" ClipToBounds="True">
+                <ui:Button DockPanel.Dock="Top" Margin="2,0,0,6" Padding="10,8" Appearance="Transparent" Click="OnTogglePane" ToolTip="Show or hide labels">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="Navigation24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+                <RadioButton x:Name="NavSettings" AutomationProperties.Name="Settings" Checked="OnNavChecked" DockPanel.Dock="Bottom" Style="{StaticResource NavItem}" Tag="Settings">
+                    <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="Settings24" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-            </ui:NavigationView.FooterMenuItems>
-            <ui:NavigationView.ContentOverlay>
-                <Grid>
-                    <ui:SnackbarPresenter x:Name="SnackbarPresenter" />
-                </Grid>
-            </ui:NavigationView.ContentOverlay>
-        </ui:NavigationView>
+                        <TextBlock Margin="14,0,0,0" VerticalAlignment="Center" Text="Settings" />
+                    </StackPanel>
+                </RadioButton>
+                <Border Height="1" Margin="0,4" Background="{StaticResource PanelBorderBrush}" DockPanel.Dock="Bottom" />
+                <StackPanel>
+                    <RadioButton x:Name="NavLibrary" AutomationProperties.Name="Library" Checked="OnNavChecked" Style="{StaticResource NavItem}" Tag="Library">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Library24" />
+                            <TextBlock Margin="14,0,0,0" VerticalAlignment="Center" Text="Library" />
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton AutomationProperties.Name="Tools" Checked="OnNavChecked" Style="{StaticResource NavItem}" Tag="Tools">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Wrench24" />
+                            <TextBlock Margin="14,0,0,0" VerticalAlignment="Center" Text="Tools" />
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton AutomationProperties.Name="OPL Device" Checked="OnNavChecked" Style="{StaticResource NavItem}" Tag="Opl">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="UsbStick24" />
+                            <TextBlock Margin="14,0,0,0" VerticalAlignment="Center" Text="OPL Device" />
+                        </StackPanel>
+                    </RadioButton>
+                </StackPanel>
+            </DockPanel>
+
+            <Border
+                Grid.Column="1"
+                Background="#FF1B1C20"
+                BorderBrush="{StaticResource PanelBorderBrush}"
+                BorderThickness="1,1,0,0"
+                CornerRadius="8,0,0,0">
+                <Grid x:Name="PageHost" />
+            </Border>
+            <ui:SnackbarPresenter x:Name="SnackbarPresenter" Grid.Column="1" />
+        </Grid>
 
         <!--  Status bar  -->
         <Border

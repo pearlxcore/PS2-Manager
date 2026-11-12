@@ -7,7 +7,7 @@ using PS2Manager.Core.Models;
 
 namespace PS2Manager.App.Views.Pages;
 
-public partial class LibraryPage : Page
+public partial class LibraryPage : UserControl
 {
     private readonly LibraryViewModel _vm;
 

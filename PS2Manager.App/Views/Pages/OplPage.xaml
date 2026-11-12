@@ -1,4 +1,4 @@
-<Page
+<UserControl
     x:Class="PS2Manager.App.Views.Pages.OplPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,8 +7,6 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:PS2Manager.App.ViewModels"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-    ScrollViewer.CanContentScroll="False"
-    Title="OPL Device"
     d:DataContext="{d:DesignInstance vm:OplViewModel}"
     mc:Ignorable="d">
 
@@ -184,4 +182,4 @@
             </Grid>
         </Border>
     </Grid>
-</Page>
+</UserControl>

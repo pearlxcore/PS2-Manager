@@ -2,6 +2,7 @@ using System.Windows;
 using PS2Manager.App.ViewModels;
 using PS2Manager.App.Views.Pages;
 using PS2Manager.Core;
+using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
 
@@ -11,13 +12,29 @@ public partial class MainWindow : FluentWindow
 {
     private readonly MainWindowViewModel _vm;
 
+    private readonly Dictionary<string, FrameworkElement> _pages;
+
     public MainWindow(MainWindowViewModel vm, IServiceProvider services, ISnackbarService snackbar, IContentDialogService dialogs)
     {
         _vm = vm;
         DataContext = vm;
         InitializeComponent();
 
-        RootNavigation.SetServiceProvider(services);
+        // All pages live in the tree permanently; switching only flips Visibility, so lists keep
+        // their realized items and nothing is unloaded/reloaded (that was the lag on every switch).
+        _pages = new()
+        {
+            ["Library"] = services.GetRequiredService<LibraryPage>(),
+            ["Tools"] = services.GetRequiredService<ToolsPage>(),
+            ["Opl"] = services.GetRequiredService<OplPage>(),
+            ["Settings"] = services.GetRequiredService<SettingsPage>(),
+        };
+        foreach (var page in _pages.Values)
+        {
+            page.Visibility = Visibility.Collapsed;
+            PageHost.Children.Add(page);
+        }
+        NavLibrary.IsChecked = true;
         snackbar.SetSnackbarPresenter(SnackbarPresenter);
         dialogs.SetDialogHost(RootContentDialog);
 
@@ -36,8 +53,17 @@ public partial class MainWindow : FluentWindow
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        RootNavigation.Navigate(typeof(LibraryPage));
         try { await _vm.StartupAsync(); }
         catch (Exception ex) { Log.Error("Startup", ex); }
     }
+
+    private void OnNavChecked(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string key } || _pages is null) return;
+        foreach (var (name, page) in _pages)
+            page.Visibility = name == key ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void OnTogglePane(object sender, RoutedEventArgs e) =>
+        NavPane.Width = NavPane.Width > 100 ? 52 : 210;
 }

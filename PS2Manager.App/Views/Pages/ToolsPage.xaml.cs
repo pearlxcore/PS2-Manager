@@ -3,12 +3,13 @@ using PS2Manager.App.ViewModels;
 
 namespace PS2Manager.App.Views.Pages;
 
-public partial class ToolsPage : Page
+public partial class ToolsPage : UserControl
 {
     public ToolsPage(ToolsViewModel vm)
     {
         DataContext = vm;
         InitializeComponent();
-        Loaded += (_, _) => vm.Refresh();
+        // Pages stay loaded; refresh each time this one is shown.
+        IsVisibleChanged += (_, e) => { if (e.NewValue is true) vm.Refresh(); };
     }
 }

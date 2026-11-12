@@ -4,7 +4,7 @@ using PS2Manager.App.ViewModels;
 
 namespace PS2Manager.App.Views.Pages;
 
-public partial class OplPage : Page
+public partial class OplPage : UserControl
 {
     private readonly OplViewModel _vm;
     private bool _loadedOnce;
@@ -14,9 +14,9 @@ public partial class OplPage : Page
         _vm = vm;
         DataContext = vm;
         InitializeComponent();
-        Loaded += async (_, _) =>
+        IsVisibleChanged += async (_, e) =>
         {
-            if (_loadedOnce || !vm.IsRootValid) return;
+            if (e.NewValue is not true || _loadedOnce || !vm.IsRootValid) return;
             _loadedOnce = true;
             await vm.RefreshDeviceCommand.ExecuteAsync(null);
         };

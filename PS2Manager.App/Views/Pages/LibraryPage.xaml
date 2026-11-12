@@ -77,8 +77,8 @@
     <Grid Margin="18,8,18,12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" MinWidth="420" />
-            <ColumnDefinition Width="12" />
-            <ColumnDefinition Width="340" MinWidth="260" MaxWidth="520" />
+            <ColumnDefinition x:Name="SplitterColumn" Width="12" />
+            <ColumnDefinition x:Name="DetailsColumn" Width="340" MinWidth="260" MaxWidth="520" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -142,15 +142,11 @@
 
             <!--  Right side: view switch  -->
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                <Slider
-                    Width="110"
-                    Margin="0,0,10,0"
-                    VerticalAlignment="Center"
-                    Maximum="260"
-                    Minimum="100"
-                    ToolTip="Cover size"
-                    Visibility="{Binding IsCoverView, Converter={StaticResource BoolToVis}}"
-                    Value="{Binding CoverSize}" />
+                <StackPanel Margin="0,0,10,0" Orientation="Horizontal" ToolTip="Cover size" Visibility="{Binding IsCoverView, Converter={StaticResource BoolToVis}}">
+                    <ui:SymbolIcon VerticalAlignment="Center" FontSize="12" Foreground="{StaticResource MutedTextBrush}" Symbol="Image24" />
+                    <Slider Width="100" Margin="6,0" VerticalAlignment="Center" Maximum="260" Minimum="100" Value="{Binding CoverSize}" />
+                    <ui:SymbolIcon VerticalAlignment="Center" FontSize="18" Foreground="{StaticResource MutedTextBrush}" Symbol="Image24" />
+                </StackPanel>
                 <ui:Button Command="{Binding ToggleViewCommand}" Style="{StaticResource ToolbarButton}" ToolTip="Switch between list and cover wall">
                     <ui:Button.Icon>
                         <ui:SymbolIcon Symbol="Grid24" />
@@ -170,13 +166,19 @@
                         </TextBlock>
                     </ui:Button.Content>
                 </ui:Button>
+                <ui:Button Margin="6,0,0,0" Command="{Binding ToggleDetailsCommand}" Style="{StaticResource ToolbarButton}" ToolTip="Show or hide the details pane">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="PanelRight24" />
+                    </ui:Button.Icon>
+                </ui:Button>
             </StackPanel>
         </DockPanel>
 
         <!--  Filter bar  -->
-        <Grid Grid.Row="1" Grid.Column="0" Margin="0,0,0,10">
+        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -201,20 +203,22 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <ui:Button Grid.Column="4" Margin="8,0,0,0" Padding="8" Appearance="Transparent" Command="{Binding ClearFiltersCommand}" ToolTip="Clear filters">
+            <ComboBox Grid.Column="4" Width="170" Margin="8,0,0,0" ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SortBy}" ToolTip="Sort by">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Margin="0,0,6,0" FontSize="14" Symbol="ArrowSort24" />
+                            <TextBlock Text="{Binding Converter={StaticResource EnumText}}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ui:Button Grid.Column="5" Margin="8,0,0,0" Padding="8" Appearance="Transparent" Command="{Binding ClearFiltersCommand}" ToolTip="Clear filters">
                 <ui:Button.Icon>
                     <ui:SymbolIcon Symbol="Dismiss24" />
                 </ui:Button.Icon>
             </ui:Button>
         </Grid>
-
-        <TextBlock
-            Grid.Row="1"
-            Grid.Column="2"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Center"
-            Foreground="{StaticResource MutedTextBrush}"
-            Text="{Binding SelectionText}" />
 
         <!--  List view  -->
         <ui:DataGrid
@@ -231,10 +235,13 @@
             EnableRowVirtualization="True"
             GridLinesVisibility="None"
             HeadersVisibility="Column"
+            HorizontalScrollBarVisibility="Disabled"
             IsReadOnly="True"
+            IsTextSearchEnabled="True"
+            TextSearch.TextPath="Title"
             ItemsSource="{Binding GamesView}"
             MouseDoubleClick="OnItemDoubleClick"
-            RowHeight="46"
+            RowHeight="38"
             SelectedItem="{Binding SelectedGame}"
             SelectionChanged="OnGridSelectionChanged"
             SelectionMode="Extended"
@@ -243,20 +250,20 @@
             VirtualizingPanel.VirtualizationMode="Recycling"
             Visibility="{Binding IsCoverView, Converter={StaticResource InverseBoolToVis}}">
             <DataGrid.Columns>
-                <DataGridTemplateColumn Width="40" CanUserResize="False" CanUserSort="False">
+                <DataGridTemplateColumn Width="36" CanUserResize="False" CanUserSort="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="{x:Type core:GameEntry}">
-                            <Border Width="28" Height="40" Background="{StaticResource CoverPlaceholderBrush}" CornerRadius="3">
+                            <Border Width="22" Height="31" Background="{StaticResource CoverPlaceholderBrush}" CornerRadius="3">
                                 <Image conv:AsyncImage.Path="{Binding CoverPath}" conv:AsyncImage.DecodeWidth="64" Stretch="UniformToFill" />
                             </Border>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="3*" MinWidth="200" Header="Title" SortMemberPath="Title">
+                <DataGridTemplateColumn Width="2.4*" MinWidth="200" Header="Title" SortMemberPath="Title">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="{x:Type core:GameEntry}">
                             <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding Title}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Title}" />
                                 <Border Margin="8,0,0,0" Padding="6,0" Background="#33B48CFF" CornerRadius="6" ToolTip="You edited this game's info" Visibility="{Binding HasOverrides, Converter={StaticResource BoolToVis}}">
                                     <TextBlock FontSize="11" Foreground="{StaticResource EditedBrush}" Text="edited" />
                                 </Border>
@@ -273,8 +280,8 @@
                 <DataGridTextColumn Width="50" Binding="{Binding DiscNumber}" Header="Disc" />
                 <DataGridTextColumn Width="80" Binding="{Binding SizeDisplay}" Header="Size" SortMemberPath="SizeBytes" />
                 <DataGridTextColumn Width="60" Binding="{Binding Version}" Header="Ver" />
-                <DataGridTextColumn Width="*" MinWidth="80" Binding="{Binding Genre}" Header="Genre" />
-                <DataGridTextColumn Width="2*" MinWidth="120" Binding="{Binding FileName}" Header="File" />
+                <DataGridTextColumn Width="1.3*" MinWidth="80" Binding="{Binding Genre}" Header="Genre" />
+                <DataGridTextColumn Width="1.6*" MinWidth="120" Binding="{Binding FileName}" Header="File" />
             </DataGrid.Columns>
         </ui:DataGrid>
 
@@ -286,6 +293,8 @@
             Background="Transparent"
             BorderThickness="0"
             ContextMenu="{StaticResource GameMenu}"
+            IsTextSearchEnabled="True"
+            TextSearch.TextPath="Title"
             ItemsSource="{Binding GamesView}"
             MouseDoubleClick="OnItemDoubleClick"
             ScrollViewer.CanContentScroll="True"
@@ -307,17 +316,25 @@
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>
                 <DataTemplate DataType="{x:Type core:GameEntry}">
-                    <StackPanel Width="{Binding Data.CoverSize, Source={StaticResource PageProxy}}" Margin="6">
+                    <StackPanel Width="{Binding Data.CoverSize, Source={StaticResource PageProxy}}" Margin="6" ToolTip="{Binding Title}" ToolTipService.InitialShowDelay="600">
                         <Grid>
                             <Border Height="{Binding Data.CoverSize, Source={StaticResource PageProxy}, Converter={StaticResource CoverHeight}}" Background="{StaticResource CoverPlaceholderBrush}" CornerRadius="6">
                                 <Grid>
                                     <TextBlock Margin="10" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" Text="{Binding Title}" TextAlignment="Center" TextWrapping="Wrap" />
                                     <Image conv:AsyncImage.Path="{Binding CoverPath}" conv:AsyncImage.DecodeWidth="320" Stretch="UniformToFill" />
+                                    <!--  Hover highlight  -->
+                                    <Border Background="#1AFFFFFF" CornerRadius="6" Visibility="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListViewItem}, Converter={StaticResource BoolToVis}}" />
                                 </Grid>
                             </Border>
-                            <Border Margin="6" Padding="5,1" HorizontalAlignment="Right" VerticalAlignment="Top" Background="#CC1E1F24" CornerRadius="5">
-                                <TextBlock FontSize="10" Foreground="White" Text="{Binding DiscType}" />
-                            </Border>
+                            <!--  Only badges the box art can't tell you  -->
+                            <StackPanel Margin="6" HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal">
+                                <Border Padding="5,1" Background="#E6B48CFF" CornerRadius="5" ToolTip="You edited this game's info" Visibility="{Binding HasOverrides, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock FontSize="10" Foreground="#FF16121F" Text="Edited" />
+                                </Border>
+                                <Border Margin="4,0,0,0" Padding="5,1" Background="#E6F0616D" CornerRadius="5" Visibility="{Binding FileMissing, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock FontSize="10" Foreground="White" Text="Missing file" />
+                                </Border>
+                            </StackPanel>
                         </Grid>
                         <TextBlock Margin="2,6,2,0" FontWeight="SemiBold" MaxHeight="36" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Text="{Binding Title}" TextTrimming="CharacterEllipsis" TextWrapping="Wrap" />
                         <TextBlock Margin="2,0" FontSize="11" Foreground="{StaticResource MutedTextBrush}">
@@ -350,17 +367,45 @@
         </Border>
 
         <!--  Details pane  -->
-        <GridSplitter Grid.Row="2" Grid.Column="1" Width="4" HorizontalAlignment="Center" Background="Transparent" ResizeBehavior="PreviousAndNext" />
-        <Border Grid.Row="2" Grid.Column="2" Padding="0" Style="{StaticResource Panel}">
+        <GridSplitter x:Name="DetailsSplitter" Grid.Row="2" Grid.Column="1" Width="4" HorizontalAlignment="Center" Background="Transparent" ResizeBehavior="PreviousAndNext" />
+        <Border x:Name="DetailsPane" Grid.Row="2" Grid.Column="2" Padding="0" Style="{StaticResource Panel}">
             <Grid>
-                <TextBlock
-                    Margin="24"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource Muted}"
-                    Text="Select a game to see its details."
-                    TextAlignment="Center"
-                    Visibility="{Binding SelectedGame, Converter={StaticResource NullToVisible}}" />
+                <!--  Nothing selected: library overview  -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Visibility="{Binding SelectedGame, Converter={StaticResource NullToVisible}}">
+                    <StackPanel Margin="18">
+                        <TextBlock Margin="0,0,0,10" Style="{StaticResource SectionHeader}" Text="Library overview" />
+                        <ItemsControl ItemsSource="{Binding Stats}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:LibraryStat}">
+                                    <Grid Margin="0,0,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Foreground="{StaticResource MutedTextBrush}" Text="{Binding Label}" />
+                                        <TextBlock x:Name="Value" Grid.Column="1" FontWeight="SemiBold" Text="{Binding Value}" />
+                                        <ui:HyperlinkButton
+                                            x:Name="Link"
+                                            Grid.Column="1"
+                                            Padding="4,0"
+                                            Command="{Binding DataContext.ApplyStatFilterCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Content="{Binding Value}"
+                                            ToolTip="Show these games"
+                                            Visibility="Collapsed" />
+                                    </Grid>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Filter, Converter={StaticResource NullToCollapsed}}" Value="Visible">
+                                            <Setter TargetName="Value" Property="Visibility" Value="Collapsed" />
+                                            <Setter TargetName="Link" Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Margin="0,14,0,0" Style="{StaticResource Muted}" Text="Select a game to see its details. Type the first letters of a title to jump to it." TextWrapping="Wrap" />
+                    </StackPanel>
+                </ScrollViewer>
 
                 <ScrollViewer DataContext="{Binding SelectedGame}" VerticalScrollBarVisibility="Auto" Visibility="{Binding Converter={StaticResource NullToCollapsed}}">
                     <StackPanel Margin="18" d:DataContext="{d:DesignInstance core:GameEntry}">

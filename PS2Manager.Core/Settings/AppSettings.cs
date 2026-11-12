@@ -11,6 +11,10 @@ public sealed class AppSettings
     public int ScanParallelism { get; set; } = 3;
     public string LibraryView { get; set; } = "Grid"; // Grid | Covers
     public double CoverSize { get; set; } = 150;
+    public string LibrarySort { get; set; } = "Title";
+    public bool ShowDetailsPane { get; set; } = true;
+    public List<string> HiddenColumns { get; set; } = ["Disc"];
+    public Dictionary<string, double> ColumnWidths { get; set; } = [];
 
     // Database
     public bool CheckDatabaseOnStartup { get; set; } = true;

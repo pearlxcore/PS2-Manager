@@ -50,11 +50,14 @@ public sealed partial class GameEntry : ObservableObject
     [JsonIgnore] public bool IsValid => Validity == DiscValidity.Valid;
 
     [JsonIgnore]
-    public string SizeDisplay => SizeBytes switch
+    public string SizeDisplay => FormatSize(SizeBytes);
+
+    public static string FormatSize(long bytes) => bytes switch
     {
-        >= 1L << 30 => $"{SizeBytes / (double)(1L << 30):0.00} GB",
-        >= 1L << 20 => $"{SizeBytes / (double)(1L << 20):0} MB",
-        _ => $"{SizeBytes / 1024.0:0} KB",
+        >= 1L << 40 => $"{bytes / (double)(1L << 40):0.00} TB",
+        >= 1L << 30 => $"{bytes / (double)(1L << 30):0.00} GB",
+        >= 1L << 20 => $"{bytes / (double)(1L << 20):0} MB",
+        _ => $"{bytes / 1024.0:0} KB",
     };
 
     /// <summary>Key used for overrides: the game ID, or the path when the disc has none.</summary>

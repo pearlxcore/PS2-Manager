@@ -20,6 +20,80 @@ public partial class LibraryPage : UserControl
         Drop += OnDrop;
         DragOver += OnDragOver;
         PreviewKeyDown += OnKeyDown;
+
+        ApplyDetailsVisibility();
+        vm.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(LibraryViewModel.ShowDetails)) ApplyDetailsVisibility();
+        };
+        SetUpColumns();
+    }
+
+    // ------------------------------------------------------------------ details pane
+
+    private GridLength _detailsWidth = new(340);
+
+    private void ApplyDetailsVisibility()
+    {
+        bool show = _vm.ShowDetails;
+        if (!show && DetailsColumn.ActualWidth > 0) _detailsWidth = DetailsColumn.Width;
+        DetailsColumn.MinWidth = show ? 260 : 0;
+        DetailsColumn.Width = show ? _detailsWidth : new GridLength(0);
+        SplitterColumn.Width = new GridLength(show ? 12 : 0);
+        DetailsPane.Visibility = DetailsSplitter.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    // ------------------------------------------------------------------ list columns
+
+    /// <summary>
+    /// Right-click a column header to show/hide columns. Visibility and widths are remembered.
+    /// </summary>
+    private void SetUpColumns()
+    {
+        var settings = _vm.Library.Settings;
+        var menu = new ContextMenu();
+        var widthDescriptor = System.ComponentModel.DependencyPropertyDescriptor.FromProperty(DataGridColumn.WidthProperty, typeof(DataGridColumn));
+        var defaults = GamesGrid.Columns.Where(c => c.Header is string).ToDictionary(c => (string)c.Header, c => c.Width);
+
+        foreach (var column in GamesGrid.Columns)
+        {
+            if (column.Header is not string name) continue;   // cover thumbnail column stays fixed
+
+            if (settings.ColumnWidths.TryGetValue(name, out var w) && w > 20)
+                column.Width = new DataGridLength(w);
+            widthDescriptor.AddValueChanged(column, (_, _) =>
+            {
+                // Only remember widths the user set by dragging (absolute pixels), not the star defaults.
+                if (column.Width.IsAbsolute) settings.ColumnWidths[name] = column.Width.Value;
+            });
+
+            if (name == "Title") continue;   // always visible
+            column.Visibility = settings.HiddenColumns.Contains(name) ? Visibility.Collapsed : Visibility.Visible;
+            var item = new MenuItem { Header = name, IsCheckable = true, IsChecked = column.Visibility == Visibility.Visible, StaysOpenOnClick = true };
+            item.Click += (_, _) =>
+            {
+                column.Visibility = item.IsChecked ? Visibility.Visible : Visibility.Collapsed;
+                settings.HiddenColumns.Remove(name);
+                if (!item.IsChecked) settings.HiddenColumns.Add(name);
+            };
+            menu.Items.Add(item);
+        }
+
+        menu.Items.Add(new Separator());
+        var reset = new MenuItem { Header = "Reset column widths" };
+        reset.Click += (_, _) =>
+        {
+            foreach (var column in GamesGrid.Columns)
+                if (column.Header is string name && defaults.TryGetValue(name, out var width)) column.Width = width;
+            settings.ColumnWidths.Clear();
+        };
+        menu.Items.Add(reset);
+
+        var headerStyle = new Style(typeof(System.Windows.Controls.Primitives.DataGridColumnHeader),
+            GamesGrid.ColumnHeaderStyle ?? TryFindResource(typeof(System.Windows.Controls.Primitives.DataGridColumnHeader)) as Style);
+        headerStyle.Setters.Add(new Setter(ContextMenuProperty, menu));
+        headerStyle.Setters.Add(new Setter(ToolTipProperty, "Right-click to choose columns"));
+        GamesGrid.ColumnHeaderStyle = headerStyle;
     }
 
     private void OnGridSelectionChanged(object sender, SelectionChangedEventArgs e) =>

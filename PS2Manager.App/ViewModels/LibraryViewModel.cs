@@ -24,6 +24,19 @@ public enum StatusFilter
     [Description("Multi-disc")] MultiDisc,
 }
 
+public enum LibrarySort
+{
+    [Description("Title (A–Z)")] Title,
+    [Description("Recently added")] Recent,
+    [Description("Release date")] Release,
+    [Description("Size (largest)")] Size,
+    [Description("Region")] Region,
+    [Description("Game ID")] GameId,
+}
+
+/// <summary>One line in the library overview shown when nothing is selected.</summary>
+public sealed record LibraryStat(string Label, string Value, StatusFilter? Filter = null);
+
 public sealed partial class LibraryViewModel : ObservableObject
 {
     private readonly LibraryService _library;
@@ -41,7 +54,9 @@ public sealed partial class LibraryViewModel : ObservableObject
 
         GamesView = CollectionViewSource.GetDefaultView(library.Games);
         GamesView.Filter = Filter;
-        GamesView.SortDescriptions.Add(new SortDescription(nameof(GameEntry.Title), ListSortDirection.Ascending));
+        _sortBy = Enum.TryParse<LibrarySort>(library.Settings.LibrarySort, out var sort) ? sort : LibrarySort.Title;
+        ApplySort();
+        _showDetails = library.Settings.ShowDetailsPane;
 
         _searchDebounce = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(220) };
         _searchDebounce.Tick += (_, _) => { _searchDebounce.Stop(); RefreshView(); };
@@ -82,6 +97,7 @@ public sealed partial class LibraryViewModel : ObservableObject
             OnPropertyChanged();
             OnPropertyChanged(nameof(HasSelection));
             OnPropertyChanged(nameof(SelectionText));
+            UpdateCountText();
             foreach (var c in new IRelayCommand[] { RenameCommand, MoveToFoldersCommand, DeleteFilesCommand, RemoveFromLibraryCommand,
                          DownloadArtForSelectionCommand, ComputeCrcCommand, SendToOplCommand })
                 c.NotifyCanExecuteChanged();
@@ -100,13 +116,80 @@ public sealed partial class LibraryViewModel : ObservableObject
     partial void OnIsCoverViewChanged(bool value) { _library.Settings.LibraryView = value ? "Covers" : "Grid"; }
     partial void OnCoverSizeChanged(double value) { _library.Settings.CoverSize = value; }
 
+    // ------------------------------------------------------------------ sorting & overview
+
+    public LibrarySort[] SortOptions { get; } = Enum.GetValues<LibrarySort>();
+    [ObservableProperty] private LibrarySort _sortBy;
+    [ObservableProperty] private bool _showDetails;
+    [ObservableProperty] private IReadOnlyList<LibraryStat> _stats = [];
+    private int _shownCount;
+
+    partial void OnSortByChanged(LibrarySort value) { _library.Settings.LibrarySort = value.ToString(); ApplySort(); }
+    partial void OnShowDetailsChanged(bool value) => _library.Settings.ShowDetailsPane = value;
+
+    [RelayCommand] private void ToggleDetails() => ShowDetails = !ShowDetails;
+
+    [RelayCommand]
+    private void ApplyStatFilter(LibraryStat? stat)
+    {
+        if (stat?.Filter is { } f) { ClearFilters(); StatusFilter = f; }
+    }
+
+    private void ApplySort()
+    {
+        using (GamesView.DeferRefresh())
+        {
+            GamesView.SortDescriptions.Clear();
+            void By(string p, ListSortDirection d = ListSortDirection.Ascending) => GamesView.SortDescriptions.Add(new SortDescription(p, d));
+            switch (SortBy)
+            {
+                case LibrarySort.Recent: By(nameof(GameEntry.ScannedAt), ListSortDirection.Descending); break;
+                case LibrarySort.Release: By(nameof(GameEntry.Release), ListSortDirection.Descending); break;
+                case LibrarySort.Size: By(nameof(GameEntry.SizeBytes), ListSortDirection.Descending); break;
+                case LibrarySort.Region: By(nameof(GameEntry.Region)); break;
+                case LibrarySort.GameId: By(nameof(GameEntry.GameId)); break;
+            }
+            By(nameof(GameEntry.Title));
+        }
+    }
+
     public void RefreshView()
     {
         GamesView.Refresh();
-        int shown = GamesView.Cast<object>().Count();
-        int total = _library.Games.Count;
-        CountText = shown == total ? $"{total:N0} games" : $"{shown:N0} of {total:N0} games";
+        _shownCount = GamesView.Cast<object>().Count();
+        UpdateCountText();
+        UpdateStats();
         OnPropertyChanged(nameof(IsEmpty));
+    }
+
+    private void UpdateCountText()
+    {
+        int total = _library.Games.Count;
+        var text = _shownCount == total ? $"{total:N0} games" : $"{total:N0} games · {_shownCount:N0} shown";
+        if (_selectedGames.Count > 0)
+            text += $" · {_selectedGames.Count:N0} selected ({GameEntry.FormatSize(_selectedGames.Sum(g => g.SizeBytes))})";
+        CountText = text;
+    }
+
+    private void UpdateStats()
+    {
+        var games = _library.Games;
+        if (games.Count == 0) { Stats = []; return; }
+        int Count(Func<GameEntry, bool> f) => games.Count(f);
+        var list = new List<LibraryStat>
+        {
+            new("Games", games.Count.ToString("N0")),
+            new("Total size", GameEntry.FormatSize(games.Sum(g => g.SizeBytes))),
+            new("DVD / CD", $"{Count(g => g.DiscType == DiscType.DVD):N0} / {Count(g => g.DiscType == DiscType.CD):N0}"),
+        };
+        foreach (var r in games.GroupBy(g => string.IsNullOrEmpty(g.Region) ? "Unknown" : g.Region).OrderByDescending(x => x.Count()))
+            list.Add(new($"  {r.Key}", r.Count().ToString("N0")));
+        void Flag(string label, int n, StatusFilter f) { if (n > 0) list.Add(new(label, n.ToString("N0"), f)); }
+        Flag("Missing cover", Count(g => g.CoverPath is null), StatusFilter.MissingCover);
+        Flag("Not in database", Count(g => !g.InDatabase), StatusFilter.NotInDatabase);
+        Flag("Edited by me", Count(g => g.HasOverrides), StatusFilter.Edited);
+        Flag("Problems", Count(g => g.FileMissing || !g.IsValid), StatusFilter.Problems);
+        Stats = list;
     }
 
     private bool Filter(object o)

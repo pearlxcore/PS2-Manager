@@ -302,7 +302,7 @@
             </ListView.Resources>
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <ui:VirtualizingWrapPanel MouseWheelDelta="140" ScrollLineDelta="40" Orientation="Vertical" SpacingMode="Uniform" StretchItems="False" />
+                    <ui:VirtualizingWrapPanel Margin="0,0,16,0" MouseWheelDelta="140" ScrollLineDelta="40" Orientation="Vertical" SpacingMode="Uniform" StretchItems="False" />
                 </ItemsPanelTemplate>
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>

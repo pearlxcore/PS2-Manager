@@ -72,4 +72,4 @@ pwsh tools/publish.ps1
 [DiscUtils](https://github.com/DiscUtils/DiscUtils) ·
 [WPF-UI](https://github.com/lepoco/wpfui)
 
-Not affiliated with Sony Interactive Entertainment.
+Not affiliated with Sony or PCSX2.

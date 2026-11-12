@@ -610,6 +610,11 @@ namespace PS2_ISO_Manager
         private void btnCalcCrc_Click(object sender, EventArgs e)
         {
             string path = GetSelectedIsoPath();
+            if (!File.Exists(path))
+            {
+                SetStatus("File not found");
+                return;
+            }
             SetStatus("Calculating CRC32...");
             uint crc = Ps2CrcHelper.ComputeIsoCrc(path);
             tbCrc32.Text = crc.ToString("X8");
@@ -1080,6 +1085,87 @@ namespace PS2_ISO_Manager
                 MessageBoxIcon.Information);
         }
 
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void rescanLibraryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_gamesOriginal.Count == 0)
+            {
+                FullScanIsoDirectory();
+                return;
+            }
+
+            var confirm = MessageBox.Show(
+                "Re-scan all known directories?\n\n" +
+                "This will re-read every disc image and update metadata.\n" +
+                "New files in those folders will be added.\n" +
+                "Missing files will be removed.",
+                "Rescan Library",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes) return;
+
+            // Collect unique parent directories
+            var dirs = _gamesOriginal
+                .Select(g => Path.GetDirectoryName(g.IsoPath))
+                .Where(d => !string.IsNullOrEmpty(d) && Directory.Exists(d!))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList()!;
+
+            if (dirs.Count == 0)
+            {
+                FullScanIsoDirectory();
+                return;
+            }
+
+            _games.Clear();
+
+            // Collect all files from those directories
+            var allFiles = new List<string>();
+            foreach (var dir in dirs)
+                allFiles.AddRange(GetDiscFiles(dir));
+
+            int count = 0;
+            foreach (var path in allFiles)
+            {
+                try
+                {
+                    using var reader = new Ps2IsoReader(path, _db);
+                    var info = reader.Read(path);
+                    _games.Add(info);
+                    AutoFixExtension(reader, info);
+                }
+                catch
+                {
+                    long size = 0;
+                    try { size = new FileInfo(path).Length; } catch { }
+                    _games.Add(new Ps2IsoInfo
+                    {
+                        IsoPath = path,
+                        SizeBytes = size,
+                        Validity = Ps2IsoValidity.ReadError
+                    });
+                }
+                count++;
+                if (count % 10 == 0)
+                    SetStatus($"Rescanning: {count} / {allFiles.Count}");
+            }
+
+            EnrichFromDatabase();
+            _gamesOriginal = _games.ToList();
+            dgvIsos.Refresh();
+            ManifestManager.Save(_gamesOriginal.ToList());
+
+            SetStatus($"Rescan complete: {_games.Count} files from {dirs.Count} director{(dirs.Count == 1 ? "y" : "ies")}");
+            DebugLog.Write($"Rescan: {_games.Count} files from {dirs.Count} directories");
+            MessageBox.Show($"Rescan complete.\n\n{_games.Count} files found across {dirs.Count} director{(dirs.Count == 1 ? "y" : "ies")}.",
+                "Rescan Library", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
         private void flattenDirectory_Click(object sender, EventArgs e)
         {
             if (_games.Count == 0)
@@ -1198,6 +1284,34 @@ namespace PS2_ISO_Manager
             SetStatus($"Fixed {changed} file extensions");
             DebugLog.Write($"Fix extensions: {changed} corrected");
             MessageBox.Show($"Corrected {changed} file extension(s).", "Done", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void checkForDuplicateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_gamesOriginal.Count == 0)
+            {
+                MessageBox.Show("No games loaded. Please scan first.", "Check Duplicates");
+                return;
+            }
+
+            using var dialog = new DuplicateDialog(_gamesOriginal.ToList());
+            dialog.ShowDialog();
+
+            // Remove deleted games from live lists
+            var deleted = dialog.DeletedGames;
+            if (deleted.Count > 0)
+            {
+                foreach (var g in deleted)
+                {
+                    _games.Remove(g);
+                    _gamesOriginal.Remove(g);
+                }
+                dgvIsos.Refresh();
+                ManifestManager.Save(_gamesOriginal.ToList());
+                ClearGameDetails();
+                SetStatus($"Removed {deleted.Count} duplicates");
+                DebugLog.Write($"Duplicate check: removed {deleted.Count} files");
+            }
         }
 
         private void RescanGames()

@@ -664,11 +664,11 @@
             // 
             // rescanLibraryToolStripMenuItem
             // 
-            rescanLibraryToolStripMenuItem.Enabled = false;
             rescanLibraryToolStripMenuItem.Name = "rescanLibraryToolStripMenuItem";
             rescanLibraryToolStripMenuItem.Size = new Size(160, 22);
             rescanLibraryToolStripMenuItem.Text = "Rescan Library";
-            // 
+            rescanLibraryToolStripMenuItem.Click += rescanLibraryToolStripMenuItem_Click;
+            //
             // saveManifestToolStripMenuItem
             // 
             saveManifestToolStripMenuItem.Name = "saveManifestToolStripMenuItem";
@@ -692,10 +692,10 @@
             // 
             // exitToolStripMenuItem
             // 
-            exitToolStripMenuItem.Enabled = false;
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             exitToolStripMenuItem.Size = new Size(160, 22);
             exitToolStripMenuItem.Text = "Exit";
+            exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // editToolStripMenuItem
             // 
@@ -755,10 +755,10 @@
             // 
             // checkForDuplicateToolStripMenuItem
             // 
-            checkForDuplicateToolStripMenuItem.Enabled = false;
             checkForDuplicateToolStripMenuItem.Name = "checkForDuplicateToolStripMenuItem";
             checkForDuplicateToolStripMenuItem.Size = new Size(199, 22);
             checkForDuplicateToolStripMenuItem.Text = "Check for Duplicate ISO";
+            checkForDuplicateToolStripMenuItem.Click += checkForDuplicateToolStripMenuItem_Click;
             // 
             // settingsToolStripMenuItem
             // 

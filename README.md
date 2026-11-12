@@ -6,7 +6,7 @@
 
 A Windows tool for managing PS2 disc images, with support for Open PS2 Loader (OPL) and PCSX2.
 
-![PS2 Manager library](docs/screenshot.jpg)
+![PS2 Manager library](docs/library.jpg)
 
 ## Features
 

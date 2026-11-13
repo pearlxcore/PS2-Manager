@@ -1,0 +1,7 @@
+[
+  { "version": "2.0.3", "releases": [ "2.0.0", "2.0.1", "2.0.2", "2.0.3" ], "tag": "v2.0.3", "commit": "cd3e11bff77bb5a7f44c5a39cb534b670c09abd7", "format": 39503, "stable": true },
+  { "version": "2.2.0", "tag": "v2.2.0", "commit": "2d5faa627ff54f3fb2a69a43286181bee071a1c3", "format": 39504, "stable": true },
+  { "version": "2.4.0", "tag": "v2.4.0", "commit": "e4af1c424451c6b65c5c387404315cef77e9901b", "format": 39508, "stable": true },
+  { "version": "2.6.3", "releases": [ "2.6.0", "2.6.1", "2.6.2", "2.6.3" ], "tag": "v2.6.3", "commit": "bc8151d2a46d4aba039ea5580afbfc7bfcf6d730", "format": 39509, "stable": true },
+  { "version": "2.8.2", "releases": [ "2.8.0", "2.8.1", "2.8.2" ], "tag": "v2.8.2", "commit": "fd9d310ccbb6b8b62c976da8886a3c8fd3a10ff3", "format": 39513, "stable": true }
+]

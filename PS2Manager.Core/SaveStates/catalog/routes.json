@@ -1,0 +1,147 @@
+{
+  "comment": "Conversion routes between official stable PCSX2 save-state formats. A route is advertised only with the evidence listed. 'direct' routes are performed by the native converter (pcsx2-stateconvert), compiled from the same source as the experimental PCSX2 2.8.2 loader. Releases that share a format (stable-formats.json, releases) have identical save-state code by comparison of their tags; each route was run with the releases it names.",
+  "routes": [
+    {
+      "source": "0x9A54",
+      "target": "0x9A59",
+      "method": "direct",
+      "status": "validated",
+      "sourceReleases": [
+        "2.4.0"
+      ],
+      "targetRelease": "2.8.2",
+      "evidence": "States written by official 2.4.0 (21 states, 20 games) convert completely and load in the unmodified official PCSX2 2.8.2 Windows release (asset digest verified) without errors; input-driven gameplay observed, with behavior matching the unconverted states in official 2.4.0; states saved by 2.8.2 afterwards reload in the same unmodified build."
+    },
+    {
+      "source": "0x9A55",
+      "target": "0x9A59",
+      "method": "direct",
+      "status": "validated",
+      "sourceReleases": [
+        "2.6.0",
+        "2.6.1",
+        "2.6.2",
+        "2.6.3"
+      ],
+      "targetRelease": "2.8.2",
+      "evidence": "States written by official 2.6.3 (4 games) convert and load in the unmodified official 2.8.2 release; Monster Jam, SpongeBob Battle for Bikini Bottom and Pac-Man World 2 resumed and responded or animated; Tony Hawk's Pro Skater 3, saved by 2.6.3 on a black loading screen, stayed black."
+    },
+    {
+      "source": "0x9A54",
+      "target": "0x9A55",
+      "method": "direct",
+      "status": "validated",
+      "sourceReleases": [
+        "2.4.0"
+      ],
+      "targetRelease": "2.6.3",
+      "evidence": "Internal Structures stream unchanged (validated by the full parser and carried over); SPU2 keeps the same mixer model without the deferred loop-start fields. In the unmodified official 2.6.3 release (asset digest verified), 23/23 converted state/disc pairs (states written by official 2.4.0, 20 games) loaded without errors; with Start posted, pause menus toggled or play resumed in 12 games and other states waited on in-game dialogs, matching the same states' behavior in 2.8.2."
+    },
+    {
+      "source": "0x9A4F",
+      "target": "0x9A59",
+      "method": "direct",
+      "status": "validated",
+      "sourceReleases": [
+        "2.0.0",
+        "2.0.1",
+        "2.0.2",
+        "2.0.3"
+      ],
+      "targetRelease": "2.8.2",
+      "evidence": "Genuine states written by official 2.0.3 (Monster Jam: Urban Assault, Tony Hawk's Pro Skater 3, Pac-Man World 2, SpongeBob Battle for Bikini Bottom) convert completely and load in the unmodified official 2.8.2 release without errors (GS state upgraded from version 8 to 9). With the same Start input each resumed the same way as the unconverted state in official 2.0.3: Monster Jam's attract run, then title screen and profile menu; Tony Hawk's Pro Skater 3 level intro into live play with the run timer counting; the SpongeBob cutscene; Pac-Man World 2 waiting on its memory-card dialog. The experimental 2.8.2 loader also resumed a 2.0.3 state directly and saved a native state that the unmodified 2.8.2 release then resumed (pause menu toggled, play continued). 2.0.0-2.0.2 write the identical serialization (source comparison)."
+    },
+    {
+      "source": "0x9A4F",
+      "target": "0x9A55",
+      "method": "direct",
+      "status": "validated",
+      "sourceReleases": [
+        "2.0.0",
+        "2.0.1",
+        "2.0.2",
+        "2.0.3"
+      ],
+      "targetRelease": "2.6.3",
+      "evidence": "Genuine states written by official 2.0.3 (Monster Jam: Urban Assault, Tony Hawk's Pro Skater 3, Pac-Man World 2, SpongeBob Battle for Bikini Bottom) convert completely and load in the unmodified official 2.6.3 release without errors (GS state upgraded from version 8 to 9). With the same Start input each resumed the same way as the unconverted state in official 2.0.3: Monster Jam's attract run, then title screen and profile menu; Tony Hawk's Pro Skater 3 level intro into live play with the run timer counting; the SpongeBob cutscene; Pac-Man World 2 waiting on its memory-card dialog. 2.0.0-2.0.2 write the identical serialization (source comparison)."
+    },
+    {
+      "source": "0x9A4F",
+      "target": "0x9A54",
+      "method": "direct",
+      "status": "validated",
+      "sourceReleases": [
+        "2.0.0",
+        "2.0.1",
+        "2.0.2",
+        "2.0.3"
+      ],
+      "targetRelease": "2.4.0",
+      "evidence": "Genuine states written by official 2.0.3 (Monster Jam: Urban Assault, Tony Hawk's Pro Skater 3, Pac-Man World 2, SpongeBob Battle for Bikini Bottom) convert completely and load in the unmodified official 2.4.0 release without errors (GS state upgraded from version 8 to 9). With the same Start input each resumed the same way as the unconverted state in official 2.0.3: Monster Jam's attract run, then title screen and profile menu; Tony Hawk's Pro Skater 3 level intro into live play with the run timer counting; the SpongeBob cutscene; Pac-Man World 2 waiting on its memory-card dialog. 2.0.0-2.0.2 write the identical serialization (source comparison)."
+    },
+    {
+      "source": "0x9A50",
+      "target": "0x9A59",
+      "method": "direct",
+      "status": "validated",
+      "sourceReleases": [
+        "2.2.0"
+      ],
+      "targetRelease": "2.8.2",
+      "evidence": "Genuine states written by official 2.2.0 (Monster Jam: Urban Assault, Tony Hawk's Pro Skater 3, Pac-Man World 2, SpongeBob Battle for Bikini Bottom) convert completely and load in the unmodified official 2.8.2 release without errors (GS state upgraded from version 8 to 9). With the same Start input each resumed the same way as the unconverted state in official 2.2.0: Monster Jam's attract run, then title screen and profile menu; Tony Hawk's Pro Skater 3 level intro into live play with the run timer counting; the SpongeBob cutscene; Pac-Man World 2 waiting on its memory-card dialog."
+    },
+    {
+      "source": "0x9A50",
+      "target": "0x9A55",
+      "method": "direct",
+      "status": "validated",
+      "sourceReleases": [
+        "2.2.0"
+      ],
+      "targetRelease": "2.6.3",
+      "evidence": "Genuine states written by official 2.2.0 (Monster Jam: Urban Assault, Tony Hawk's Pro Skater 3, Pac-Man World 2, SpongeBob Battle for Bikini Bottom) convert completely and load in the unmodified official 2.6.3 release without errors (GS state upgraded from version 8 to 9). With the same Start input each resumed the same way as the unconverted state in official 2.2.0: Monster Jam's attract run, then title screen and profile menu; Tony Hawk's Pro Skater 3 level intro into live play with the run timer counting; the SpongeBob cutscene; Pac-Man World 2 waiting on its memory-card dialog."
+    },
+    {
+      "source": "0x9A50",
+      "target": "0x9A54",
+      "method": "direct",
+      "status": "validated",
+      "sourceReleases": [
+        "2.2.0"
+      ],
+      "targetRelease": "2.4.0",
+      "evidence": "Genuine states written by official 2.2.0 (Monster Jam: Urban Assault, Tony Hawk's Pro Skater 3, Pac-Man World 2, SpongeBob Battle for Bikini Bottom) convert completely and load in the unmodified official 2.4.0 release without errors (GS state upgraded from version 8 to 9). With the same Start input each resumed the same way as the unconverted state in official 2.2.0: Monster Jam's attract run, then title screen and profile menu; Tony Hawk's Pro Skater 3 level intro into live play with the run timer counting; the SpongeBob cutscene; Pac-Man World 2 waiting on its memory-card dialog."
+    },
+    {
+      "source": "0x9A4F",
+      "target": "0x9A50",
+      "method": "direct",
+      "status": "validated",
+      "sourceReleases": [
+        "2.0.0",
+        "2.0.1",
+        "2.0.2",
+        "2.0.3"
+      ],
+      "targetRelease": "2.2.0",
+      "evidence": "Genuine states written by official 2.0.3 (Monster Jam: Urban Assault, Tony Hawk's Pro Skater 3, Pac-Man World 2, SpongeBob Battle for Bikini Bottom) convert completely and load in the unmodified official 2.2.0 release without errors. With the same Start input each resumed the same way as the unconverted state in official 2.0.3: Monster Jam's attract run, then title screen and profile menu; Tony Hawk's Pro Skater 3 level intro into live play with the run timer counting; the SpongeBob cutscene; Pac-Man World 2 waiting on its memory-card dialog. 2.0.0-2.0.2 write the identical serialization (source comparison)."
+    }
+  ],
+  "unsupported": [
+    {
+      "source": "0x9A59",
+      "target": "0x9A54",
+      "reason": "Reverse conversion would have to rewind the SPU2 decode-ahead FIFO, whose reads may already have crossed loop points and raised IRQs; the earlier format cannot represent that state exactly."
+    },
+    {
+      "source": "0x9A59",
+      "target": "0x9A55",
+      "reason": "Same SPU2 decode-ahead limitation as 0x9A59 -> 0x9A54."
+    },
+    {
+      "source": "0x9A55",
+      "target": "0x9A54",
+      "reason": "Not implemented: a pending KeyOff mask (0x9A55) has no equivalent in 0x9A54, where key-off takes effect when written."
+    }
+  ]
+}

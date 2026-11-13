@@ -38,6 +38,13 @@
     <Resource Include="Assets\logo.png" />
   </ItemGroup>
 
+  <!-- The save-state converter (GPL-3.0, built from PCSX2's code). Copied as native\*; in the single-file
+       release it's bundled and extracted by the .NET host, where NativeConverter.Locate finds it. -->
+  <ItemGroup>
+    <None Include="..\third_party\pcsx2-stateconvert\*.exe;..\third_party\pcsx2-stateconvert\*.dll"
+          Link="native\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <Using Include="System.IO" />
   </ItemGroup>

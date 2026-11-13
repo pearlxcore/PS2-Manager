@@ -50,6 +50,8 @@ public sealed class AppSettings
     public Pcsx2Boot Pcsx2Boot { get; set; } = Pcsx2Boot.Default;
     public bool Pcsx2NoGui { get; set; }
     public bool Pcsx2BigPicture { get; set; }
+    /// <summary>On Play, offer to convert the game's save states made by an older PCSX2.</summary>
+    public bool Pcsx2OfferStateUpgrade { get; set; } = true;
 
     [System.Text.Json.Serialization.JsonIgnore]
     public Pcsx2LaunchOptions Pcsx2Options => new(Pcsx2Window, Pcsx2Boot, Pcsx2NoGui, Pcsx2BigPicture);

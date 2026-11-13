@@ -26,7 +26,7 @@
                 </StackPanel>
             </Grid>
 
-            <TextBlock Margin="0,20,0,0" Text="Credit to GameDB-PS2, xlenore, the OPL art database, PCSX2 and DiscUtils." TextWrapping="Wrap" />
+            <TextBlock Margin="0,20,0,0" Text="Credit to GameDB-PS2, xlenore, the OPL art database, PCSX2, PCSX2 SaveState Converter and DiscUtils." TextWrapping="Wrap" />
             <TextBlock Margin="0,10,0,0" Foreground="{StaticResource MutedTextBrush}" Text="Not affiliated with Sony or PCSX2." TextWrapping="Wrap" />
 
             <UniformGrid Margin="0,22,0,0" Columns="4">

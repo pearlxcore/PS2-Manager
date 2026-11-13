@@ -48,6 +48,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _pcsx2Boot = s.Pcsx2Boot;
         _pcsx2NoGui = s.Pcsx2NoGui;
         _pcsx2BigPicture = s.Pcsx2BigPicture;
+        _pcsx2OfferStateUpgrade = s.Pcsx2OfferStateUpgrade;
 
         // Enabled sources in priority order, then the disabled ones.
         var ordered = s.ArtSourceOrder.Select(ArtSourceCatalog.Find).OfType<IArtSource>().ToList();
@@ -101,12 +102,14 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private Pcsx2Boot _pcsx2Boot;
     [ObservableProperty] private bool _pcsx2NoGui;
     [ObservableProperty] private bool _pcsx2BigPicture;
+    [ObservableProperty] private bool _pcsx2OfferStateUpgrade;
     [ObservableProperty] private string _pcsx2FolderStatus = "";
 
     partial void OnPcsx2WindowChanged(Pcsx2Window value) => Save(s => s.Pcsx2Window = value);
     partial void OnPcsx2BootChanged(Pcsx2Boot value) => Save(s => s.Pcsx2Boot = value);
     partial void OnPcsx2NoGuiChanged(bool value) => Save(s => s.Pcsx2NoGui = value);
     partial void OnPcsx2BigPictureChanged(bool value) => Save(s => s.Pcsx2BigPicture = value);
+    partial void OnPcsx2OfferStateUpgradeChanged(bool value) => Save(s => s.Pcsx2OfferStateUpgrade = value);
 
     /// <summary>Called when the Settings page is shown, so the folder status reflects PCSX2's current ini.</summary>
     public void RefreshPcsx2()

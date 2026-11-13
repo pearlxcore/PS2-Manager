@@ -21,6 +21,9 @@ dotnet publish $proj -c Release -r win-x64 -o $out --nologo -v q `
 if ($LASTEXITCODE -ne 0) { throw "Publish failed" }
 
 Copy-Item (Join-Path $root 'README.md') $out
+# The bundled save-state converter is GPL-3.0; ship its license and notes.
+$lic = New-Item -ItemType Directory (Join-Path $out 'licenses/pcsx2-stateconvert')
+Get-ChildItem (Join-Path $root 'third_party/pcsx2-stateconvert') -Include LICENSE,*.txt,*.md -File -Recurse | Copy-Item -Destination $lic
 $zip = "$out.zip"
 if (Test-Path $zip) { Remove-Item $zip }
 Compress-Archive -Path (Join-Path $out '*') -DestinationPath $zip

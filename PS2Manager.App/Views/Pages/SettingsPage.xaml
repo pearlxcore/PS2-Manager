@@ -131,6 +131,13 @@
                                 <TextBlock Style="{StaticResource Muted}" Text="PCSX2's controller-friendly full-screen interface." />
                             </StackPanel>
                         </DockPanel>
+                        <DockPanel Margin="0,0,0,14">
+                            <ui:ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding Pcsx2OfferStateUpgrade}" />
+                            <StackPanel>
+                                <TextBlock Text="Update old save states" />
+                                <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Text="When you play a game, offer to convert its save states from an older PCSX2 (2.0 or later) so this version can load them. Originals are backed up first." />
+                            </StackPanel>
+                        </DockPanel>
 
                         <DockPanel Margin="0,0,0,10">
                             <ui:Button Command="{Binding ExportPcsx2CoversCommand}" Content="Copy covers" DockPanel.Dock="Right" />

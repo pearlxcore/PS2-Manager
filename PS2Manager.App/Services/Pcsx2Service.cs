@@ -4,6 +4,7 @@ using PS2Manager.Core;
 using PS2Manager.Core.Iso;
 using PS2Manager.Core.Models;
 using PS2Manager.Core.Pcsx2;
+using PS2Manager.Core.SaveStates;
 
 namespace PS2Manager.App.Services;
 
@@ -62,6 +63,7 @@ public sealed partial class Pcsx2Service : ObservableObject
         {
             _compat = path is null ? new(StringComparer.OrdinalIgnoreCase) : await Task.Run(() => Pcsx2GameIndex.Load(path));
             if (_compat.Count > 0) Log.Write($"PCSX2 GameIndex: {_compat.Count} compatibility ratings");
+            Log.Write($"Save-state converter: {NativeConverter.Locate()?.ExecutablePath ?? "not found"}");
         }
         catch (Exception ex) { Log.Error("Reading PCSX2 GameIndex", ex); }
         Application.Current?.Dispatcher.Invoke(ApplyCompat);
@@ -83,6 +85,8 @@ public sealed partial class Pcsx2Service : ObservableObject
         if (!File.Exists(game.IsoPath)) { _notify.Error("File not found", game.IsoPath); return; }
         try
         {
+            if (_library.Settings.Pcsx2OfferStateUpgrade && !await OfferStateUpgradeAsync(i, game)) return;
+
             string? state = null;
             if (await FindResumeStateAsync(i, game) is { } resume)
             {
@@ -103,6 +107,58 @@ public sealed partial class Pcsx2Service : ObservableObject
             _notify.Error("Couldn't start PCSX2", ex.Message);
         }
     }
+
+    /// <summary>
+    /// If some of the game's save states were made by an older PCSX2 that the installed one can't load, offers to
+    /// convert them (in place, originals backed up). Returns false when the user cancelled, so nothing is launched.
+    /// </summary>
+    private async Task<bool> OfferStateUpgradeAsync(Pcsx2Install install, GameEntry game)
+    {
+        if (!game.HasGameId) return true;
+        var plan = await Task.Run(() => StateUpgrader.Plan(
+            StateUpgrader.GameStates(install.SaveStatesDir, game.GameId, game.Pcsx2Crc), install.Version));
+        if (plan is null) return true;
+
+        if (Pcsx2Install.IsRunning)
+        {
+            _notify.Warning("Old save states", $"Some of {game.Title}'s save states are from PCSX2 {plan.FromLabel}. Close PCSX2 and press Play again to convert them.");
+            return true;
+        }
+
+        string version = ShortVersion(install.Version);
+        int n = plan.States.Count;
+        string states = n == 1 ? "1 save state" : $"{n} save states";
+        int choice = await _dialogs.ChooseAsync("Update save states?",
+            $"{game.Title} has {states} from PCSX2 {plan.FromLabel}, which PCSX2 {version} can't load.\n\n" +
+            "Convert them now? The originals are backed up first.",
+            "Convert", "Not now");
+        if (choice < 0) return false;
+        if (choice == 1) return true;
+
+        _notify.Info("Converting save states", $"{game.Title} ({states})");
+        try
+        {
+            var results = await Task.Run(() => StateUpgrader.Upgrade(plan, install.SaveStatesDir));
+            var failed = results.Where(r => !r.Succeeded).ToList();
+            foreach (var f in failed) Log.Write($"Save-state conversion failed: {f.Source}: {f.Message}");
+            Log.Write($"Converted {results.Count - failed.Count}/{results.Count} save states for {game.GameId} to PCSX2 {plan.Target.Version}");
+            if (failed.Count == 0)
+                _notify.Success("Save states updated", $"{states} converted for PCSX2 {version}. Originals are backed up in {StateUpgrader.BackupRoot}.");
+            else
+                _notify.Warning("Some save states weren't converted",
+                    $"{results.Count - failed.Count} of {n} converted. {Path.GetFileName(failed[0].Source)}: {failed[0].Message}");
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Save-state conversion", ex);
+            _notify.Error("Couldn't convert save states", ex.Message);
+        }
+        return true;
+    }
+
+    /// <summary>"2.8.2.0" → "2.8.2".</summary>
+    private static string ShortVersion(string? v) =>
+        Version.TryParse(v, out var p) ? $"{p.Major}.{Math.Max(p.Minor, 0)}.{Math.Max(p.Build, 0)}" : v ?? "";
 
     /// <summary>
     /// Finds this game's resume state. Uses the PCSX2 CRC when known; if it isn't yet and there are several

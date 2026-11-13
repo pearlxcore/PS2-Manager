@@ -32,7 +32,8 @@ A Windows tool for managing PS2 disc images, with support for Open PS2 Loader (O
 * See what's on the device, and fix missing CFG files, missing art or games in the wrong folder
 
 **PCSX2**
-* Launch games in PCSX2 using your existing PCSX2 settings
+* Launch games in PCSX2 using your existing PCSX2 settings, and pick up from the resume point
+* Save states from an older PCSX2 (2.0 and later) can be converted when you hit Play, so the newer version loads them
 * PCSX2 compatibility rating for each game
 * Share your covers and library folders with PCSX2
 
@@ -69,7 +70,10 @@ pwsh tools/publish.ps1
 [xlenore/ps2-covers](https://github.com/xlenore/ps2-covers) ·
 [OPL art database](https://github.com/Luden02/psx-ps2-opl-art-database) ·
 [PCSX2](https://github.com/PCSX2/pcsx2) ·
+[PCSX2 SaveState Converter](https://github.com/pearlxcore/PCSX2-SaveState-Converter) ·
 [DiscUtils](https://github.com/DiscUtils/DiscUtils) ·
 [WPF-UI](https://github.com/lepoco/wpfui)
+
+The save-state converter in `third_party/pcsx2-stateconvert` is GPL-3.0, built from PCSX2's code.
 
 Not affiliated with Sony or PCSX2.
